@@ -330,7 +330,7 @@ async function spin(cv){
   const start=wheelRot; let end=-(pick*seg+seg*(.15+Math.random()*.7));
   while(end>start-2*Math.PI*7) end-=2*Math.PI;
   let lastSlice=null;
-  await animate(SPIN_MS,t=>{wheelRot=start+(end-start)*ease(t);drawWheel(cv);const s=atPointer().id;if(s!==lastSlice){if(lastSlice!==null)tick();lastSlice=s}});
+  await animate(SPIN_MS,t=>{wheelRot=start+(end-start)*ease(t);drawWheel(cv);const s=atPointer().id;if(s!==lastSlice){if(lastSlice!==null)tick(.7);lastSlice=s}});
   wheelRot=((end%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
   const t=atPointer(); drawWheel(cv,t.id); fanfare();
   await new Promise(r=>setTimeout(r,700));
@@ -415,12 +415,14 @@ const SKEY="football-imperialism-sound";
 let soundOn=true; try{soundOn=localStorage.getItem(SKEY)!=="off"}catch(e){}
 let actx=null;
 function audio(){ if(!soundOn) return null; try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==="suspended") actx.resume(); }catch(e){ return null } return actx }
-function tick(pitch=1){ // short wooden click, like a wheel peg hitting the pointer
+let lastTick=0;
+function tick(pitch=.7){ // soft wooden click, like a peg hitting the pointer
   const a=audio(); if(!a) return; const now=a.currentTime;
+  if(now-lastTick<.05) return; lastTick=now; // never faster than 20 clicks a second, so a fast spin doesn't turn into a buzz
   const o=a.createOscillator(), g=a.createGain(), f=a.createBiquadFilter();
   o.type="triangle"; o.frequency.setValueAtTime(1400*pitch,now); o.frequency.exponentialRampToValueAtTime(420*pitch,now+.04);
   f.type="highpass"; f.frequency.value=300;
-  g.gain.setValueAtTime(.0001,now); g.gain.exponentialRampToValueAtTime(.35,now+.003); g.gain.exponentialRampToValueAtTime(.0001,now+.06);
+  g.gain.setValueAtTime(.0001,now); g.gain.exponentialRampToValueAtTime(.12,now+.003); g.gain.exponentialRampToValueAtTime(.0001,now+.06);
   o.connect(f).connect(g).connect(a.destination); o.start(now); o.stop(now+.07);
 }
 function fanfare(){ // bright rising chord for the reveal
