@@ -18,8 +18,10 @@
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
 body{background:radial-gradient(1200px 700px at 40% 45%,#15206A 0%,var(--deep) 45%,var(--night) 100%);color:var(--ink);font-family:var(--body);font-size:16px;overflow:hidden}
-.app{height:100%;display:grid;grid-template-columns:minmax(0,1fr) 340px}
-.stage{position:relative;min-width:0;min-height:0;padding:24px 8px 24px 24px;display:flex;align-items:center;justify-content:center}
+.app{height:100%;display:flex;flex-direction:column}
+.stage{position:relative;flex:1;min-width:0;min-height:0;padding:10px 12px 0;display:flex;align-items:center;justify-content:center}
+.bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;padding:10px 16px 14px}
+.bar .sep{width:1px;height:24px;background:var(--edge);margin:0 6px}
 #map{width:100%;height:100%;display:block}
 .hex{stroke:var(--night);stroke-width:7;stroke-linejoin:round;transition:filter .4s,opacity .4s}
 .hex.dim{opacity:.35}
@@ -36,20 +38,20 @@ button{font:inherit;color:var(--ink);background:var(--panel-2);border:1px solid 
 button:hover:not(:disabled){border-color:var(--silver)}
 button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
 button:disabled{opacity:.35;cursor:not-allowed}
-.big{display:grid;grid-template-columns:34px 1fr;align-items:center;gap:12px;text-align:left;font-family:var(--display);font-weight:700;font-size:24px;text-transform:uppercase;letter-spacing:.03em;padding:14px 16px}
-.big i{font-style:normal;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--edge);font-size:18px}
+.big{display:inline-flex;align-items:center;gap:8px;font-family:var(--display);font-weight:700;font-size:17px;text-transform:uppercase;letter-spacing:.04em;padding:6px 14px 6px 8px;border-radius:999px}
+.big i{font-style:normal;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--edge);font-size:13px}
 .big.ready{background:var(--cyan);color:#061032;border-color:transparent;box-shadow:0 0 0 4px rgba(53,214,255,.18)}
 .big.ready i{background:#061032;color:var(--cyan)}
 .now{background:var(--panel-2);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;font-size:14px;color:var(--muted);min-height:74px}
 .now b{color:var(--ink);font-size:16px;display:block}
 .crest{width:50px;height:50px;flex:none}
-.small{font-size:14px;padding:8px 12px}
+.small{font-size:13px;padding:6px 11px;border-radius:999px}
 .row{display:flex;flex-wrap:wrap;gap:8px}
 h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0}
 .log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--silver)}
 .log b{color:var(--ink)}
 .log .empty{color:var(--muted)}
-.confirm{background:var(--panel-2);border:1px solid var(--edge);border-radius:12px;padding:12px;font-size:14px;display:flex;flex-direction:column;gap:10px}
+.confirm{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--silver)}
 .danger{background:var(--red);border-color:transparent;color:#fff}
 /* popups */
 .overlay{position:fixed;inset:0;background:rgba(4,7,26,.78);backdrop-filter:blur(4px);display:grid;place-items:center;z-index:10;padding:24px}
@@ -70,36 +72,23 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
 .fixture .role{font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);font-weight:700}
 .fixture .dash{font-family:var(--display);font-weight:800;font-size:clamp(60px,9vw,120px);color:var(--silver);line-height:1}
 .hint{color:var(--muted);font-size:14px;text-align:center}
-@media (max-width:900px){
-  body{overflow:auto}
-  .app{grid-template-columns:1fr;height:auto}
-  .stage{height:62vh;padding:12px 16px}
-  .side{border-left:0;border-top:1px solid var(--edge)}
-}
+@media (max-width:700px){.bar .sep{display:none}}
 @media (prefers-reduced-motion:reduce){.pop{animation:none}.hex.flash{animation:none}}
 </style>
 </head>
 <body>
 <div class="app">
   <main class="stage"><svg id="map" role="img" aria-label="Hexagon map of Champions League teams"></svg></main>
-  <aside class="side">
-    <div class="brand">Football<span>Imperialism</span></div>
-    <div class="meta"><div><b id="mAlive">36</b>teams left</div><div><b id="mPlayed">0</b>matches</div></div>
-    <div class="steps">
-      <button class="big" id="bWheel"><i>1</i>Spin the wheel</button>
-      <button class="big" id="bArrow"><i>2</i>Spin the arrow</button>
-      <button class="big" id="bMatch"><i>3</i>Show the match</button>
-    </div>
-    <div class="now" id="now"></div>
-    <div class="row">
-      <button class="small" id="bCancel">Cancel this turn</button>
-      <button class="small" id="bUndo">Undo last result</button>
-      <button class="small" id="bNew">New game</button>
-    </div>
-    <div id="confirm"></div>
-    <h2>Results</h2>
-    <ol class="log" id="log"></ol>
-  </aside>
+  <nav class="bar">
+    <button class="big" id="bWheel"><i>1</i>Spin the wheel</button>
+    <button class="big" id="bArrow"><i>2</i>Spin the arrow</button>
+    <button class="big" id="bMatch"><i>3</i>Show the match</button>
+    <span class="sep"></span>
+    <button class="small" id="bCancel">Cancel turn</button>
+    <button class="small" id="bUndo">Undo</button>
+    <button class="small" id="bNew">New game</button>
+    <span id="confirm"></span>
+  </nav>
 </div>
 <div id="popup"></div>
 
@@ -145,7 +134,7 @@ const TEAMS = [
 ].map(([id,name,short,c1,c2])=>({id,name,short,c1,c2,logo:null}));
 const T = Object.fromEntries(TEAMS.map(t=>[t.id,t]));
 
-const COLS=9, ROWS=4, R=100, W=Math.sqrt(3)*R, PAD=14;
+const COLS=9, ROWS=4, R=100, W=Math.sqrt(3)*R, PAD=8;
 const HEX=[];
 for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) HEX.push({x:PAD+W/2+c*W+(r%2)*W/2, y:PAD+R+r*1.5*R});
 HEX.forEach((h,i)=>h.nb=HEX.map((o,j)=>j).filter(j=>j!==i&&Math.hypot(HEX[j].x-h.x,HEX[j].y-h.y)<W*1.05));
@@ -357,17 +346,9 @@ function renderSide(){
   document.getElementById("bCancel").disabled=busy||!(ph==="arrow"||ph==="match");
   document.getElementById("bUndo").disabled=busy||!S.log.length;
   document.getElementById("bNew").disabled=busy;
-  document.getElementById("mAlive").textContent=alive().length;
-  document.getElementById("mPlayed").textContent=S.log.length;
-  const now=document.getElementById("now");
-  if(ph==="over"){const c=alive()[0];now.innerHTML=`${crestSVG(c)}<div><b>${esc(c.name)}</b>won the whole map.</div>`}
-  else if(S.att){const a=T[S.att];now.innerHTML=`${crestSVG(a)}<div><b>${esc(a.name)}</b>${ph==="arrow"?"is attacking. Spin the arrow for the direction.":`attacks ${esc(T[S.def].name)}.`}</div>`}
-  else now.innerHTML=`<div>Spin the wheel to pick the next attacker. Only teams that still hold land are on it.</div>`;
-  const log=document.getElementById("log");
-  log.innerHTML=S.log.length?S.log.slice(-8).reverse().map(e=>`<li><b>${esc(T[e.win].name)}</b> beat <b>${esc(T[e.lose].name)}</b> and took ${e.taken} block${e.taken===1?"":"s"}.</li>`).join(""):`<li class="empty">No matches yet.</li>`;
   const cf=document.getElementById("confirm");
   if(confirmNew){
-    cf.innerHTML=`<div class="confirm">Start a new game? Teams get new random blocks and the results are cleared.<div class="row"><button class="small danger" id="cYes">Start new game</button><button class="small" id="cNo">Keep playing</button></div></div>`;
+    cf.innerHTML=`<span class="confirm">Reshuffle and clear all results? <button class="small danger" id="cYes">Start new game</button><button class="small" id="cNo">Keep playing</button></span>`;
     document.getElementById("cYes").onclick=()=>{confirmNew=false;S=fresh();save();view=FULL.slice();renderAll()};
     document.getElementById("cNo").onclick=()=>{confirmNew=false;renderSide()};
   } else cf.innerHTML="";
