@@ -19,7 +19,7 @@
 html,body{height:100%;margin:0}
 body{background:radial-gradient(1200px 700px at 40% 45%,#15206A 0%,var(--deep) 45%,var(--night) 100%);color:var(--ink);font-family:var(--body);font-size:16px;overflow:hidden}
 .app{height:100%;display:flex;flex-direction:column}
-.stage{position:relative;flex:1;min-width:0;min-height:0;padding:10px 12px 0;display:flex;align-items:center;justify-content:center}
+.stage{position:relative;overflow:hidden;flex:1;min-width:0;min-height:0;padding:0;display:flex;align-items:center;justify-content:center}
 .bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;padding:10px 16px 14px}
 .bar .sep{width:1px;height:24px;background:var(--edge);margin:0 6px}
 #map{width:100%;height:100%;display:block}
@@ -365,10 +365,19 @@ function focusBox(id){
   if(w>=MAPW) return FULL.slice();
   return [x0,y0,w,h];
 }
+/* zoom with a GPU transform instead of redrawing the map every frame: the map is drawn once at the wider of the two views,
+   the whole picture is scaled and moved, and at the end the real view is drawn sharp again */
 async function zoomTo(box){
   const from=view.slice();
-  await animate(1100,t=>{const e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;view=from.map((v,k)=>v+(box[k]-v)*e);svg.setAttribute("viewBox",view.join(" "))});
-  view=box.slice();
+  if(from.every((v,k)=>Math.abs(v-box[k])<.5)){view=box.slice();return}
+  const base=box[2]*box[3]>=from[2]*from[3]?box:from, W0=svg.clientWidth, H0=svg.clientHeight;
+  const fit=v=>{const k=Math.min(W0/v[2],H0/v[3]);return {k,ox:(W0-v[2]*k)/2-v[0]*k,oy:(H0-v[3]*k)/2-v[1]*k}};
+  const B=fit(base);
+  const place=v=>{const F=fit(v),s=F.k/B.k;svg.style.transform=`translate(${(F.ox-s*B.ox).toFixed(2)}px,${(F.oy-s*B.oy).toFixed(2)}px) scale(${s.toFixed(5)})`};
+  svg.style.transformOrigin="0 0"; svg.style.willChange="transform";
+  svg.setAttribute("viewBox",base.join(" ")); place(from);
+  await animate(1100,t=>{const e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;place(from.map((v,k)=>v+(box[k]-v)*e))});
+  view=box.slice(); svg.setAttribute("viewBox",view.join(" ")); svg.style.transform=""; svg.style.willChange="";
 }
 
 /* ---------- wheel ---------- */
