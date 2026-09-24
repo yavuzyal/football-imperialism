@@ -88,7 +88,6 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
   <nav class="bar">
     <button class="big" id="bWheel"><i>1</i><span data-t="wheel">Spin the wheel</span></button>
     <button class="big" id="bArrow"><i>2</i><span data-t="arrow">Spin the arrow</span></button>
-    <button class="big" id="bMatch"><i>3</i><span data-t="match">Show the match</span></button>
     <span class="sep"></span>
     <button class="small" id="bCancel" data-t="cancel">Cancel turn</button>
     <button class="small" id="bUndo" data-t="undo">Undo</button>
@@ -112,12 +111,12 @@ const FLAGS={
 };
 const LANGS=[["tr","TUR"],["de","GER"],["en","ENG"],["fr","FRA"],["it","ITA"],["es","ESP"]];
 const STR={
-  en:{title:"Football Imperialism",wheel:"Spin the wheel",arrow:"Spin the arrow",match:"Show the match",cancel:"Cancel turn",undo:"Undo",newGame:"New game",confirmQ:"Reshuffle and clear all results?",confirmYes:"Start new game",confirmNo:"Keep playing",whoAttacks:"Who attacks?",spin:"Spin",close:"Close",attackerIs:"The attacker is",goMap:"Go to the map",defends:"Defends",attacks:"Attacks",hint:"Play it in FC27, then pick the winner. The winner takes all of the loser's land.",won:"{t} won",champion:"Champion of Europe",holds:"Holds all 36 blocks after {n} matches.",wheelAria:"Wheel of teams that still hold land",mapAria:"Hexagon map of Champions League teams",language:"Language"},
-  tr:{title:"Futbol Emperyalizmi",wheel:"Çarkı çevir",arrow:"Oku çevir",match:"Maçı göster",cancel:"Turu iptal et",undo:"Geri al",newGame:"Yeni oyun",confirmQ:"Takımlar karıştırılsın ve tüm sonuçlar silinsin mi?",confirmYes:"Yeni oyuna başla",confirmNo:"Oynamaya devam et",whoAttacks:"Kim saldırıyor?",spin:"Çevir",close:"Kapat",attackerIs:"Saldıran takım",goMap:"Haritaya git",defends:"Savunuyor",attacks:"Saldırıyor",hint:"Maçı FC27'de oyna, sonra kazananı seç. Kazanan, kaybedenin tüm topraklarını alır.",won:"{t} kazandı",champion:"Avrupa Şampiyonu",holds:"{n} maçın sonunda 36 bölgenin hepsine sahip.",wheelAria:"Toprağı olan takımların çarkı",mapAria:"Şampiyonlar Ligi takımlarının altıgen haritası",language:"Dil"},
-  de:{title:"Fußball-Imperialismus",wheel:"Rad drehen",arrow:"Pfeil drehen",match:"Spiel zeigen",cancel:"Zug abbrechen",undo:"Rückgängig",newGame:"Neues Spiel",confirmQ:"Neu mischen und alle Ergebnisse löschen?",confirmYes:"Neues Spiel starten",confirmNo:"Weiterspielen",whoAttacks:"Wer greift an?",spin:"Drehen",close:"Schließen",attackerIs:"Der Angreifer ist",goMap:"Zur Karte",defends:"Verteidigt",attacks:"Greift an",hint:"Spiel es in FC27 und wähle dann den Sieger. Der Sieger übernimmt das gesamte Gebiet des Verlierers.",won:"{t} gewinnt",champion:"Europas Champion",holds:"Besitzt nach {n} Spielen alle 36 Felder.",wheelAria:"Rad der Teams, die noch Gebiet haben",mapAria:"Sechseckkarte der Champions-League-Teams",language:"Sprache"},
-  fr:{title:"Impérialisme du football",wheel:"Tourner la roue",arrow:"Tourner la flèche",match:"Voir le match",cancel:"Annuler le tour",undo:"Revenir",newGame:"Nouvelle partie",confirmQ:"Mélanger et effacer tous les résultats ?",confirmYes:"Lancer une nouvelle partie",confirmNo:"Continuer",whoAttacks:"Qui attaque ?",spin:"Tourner",close:"Fermer",attackerIs:"L'attaquant est",goMap:"Aller à la carte",defends:"Défend",attacks:"Attaque",hint:"Jouez-le sur FC27, puis choisissez le vainqueur. Le vainqueur prend tout le territoire du perdant.",won:"{t} gagne",champion:"Champion d'Europe",holds:"Possède les 36 cases après {n} matchs.",wheelAria:"Roue des équipes qui ont encore un territoire",mapAria:"Carte hexagonale des équipes de Ligue des champions",language:"Langue"},
-  it:{title:"Imperialismo calcistico",wheel:"Gira la ruota",arrow:"Gira la freccia",match:"Mostra la partita",cancel:"Annulla turno",undo:"Indietro",newGame:"Nuova partita",confirmQ:"Rimescolare e cancellare tutti i risultati?",confirmYes:"Inizia nuova partita",confirmNo:"Continua a giocare",whoAttacks:"Chi attacca?",spin:"Gira",close:"Chiudi",attackerIs:"L'attaccante è",goMap:"Vai alla mappa",defends:"Difende",attacks:"Attacca",hint:"Giocala su FC27, poi scegli il vincitore. Il vincitore prende tutto il territorio dello sconfitto.",won:"Vince {t}",champion:"Campione d'Europa",holds:"Possiede tutte le 36 caselle dopo {n} partite.",wheelAria:"Ruota delle squadre che hanno ancora territorio",mapAria:"Mappa esagonale delle squadre di Champions League",language:"Lingua"},
-  es:{title:"Imperialismo futbolístico",wheel:"Girar la ruleta",arrow:"Girar la flecha",match:"Ver el partido",cancel:"Cancelar turno",undo:"Deshacer",newGame:"Nueva partida",confirmQ:"¿Mezclar y borrar todos los resultados?",confirmYes:"Empezar nueva partida",confirmNo:"Seguir jugando",whoAttacks:"¿Quién ataca?",spin:"Girar",close:"Cerrar",attackerIs:"El atacante es",goMap:"Ir al mapa",defends:"Defiende",attacks:"Ataca",hint:"Juega el partido en FC27 y elige al ganador. El ganador se queda con todo el territorio del perdedor.",won:"Gana {t}",champion:"Campeón de Europa",holds:"Tiene las 36 casillas tras {n} partidos.",wheelAria:"Ruleta de los equipos que aún tienen territorio",mapAria:"Mapa hexagonal de los equipos de la Champions League",language:"Idioma"}
+  en:{title:"Football Imperialism",wheel:"Spin the wheel",arrow:"Spin the arrow",cancel:"Cancel turn",undo:"Undo",newGame:"New game",confirmQ:"Reshuffle and clear all results?",confirmYes:"Start new game",confirmNo:"Keep playing",whoAttacks:"Who attacks?",spin:"Spin",close:"Close",attackerIs:"The attacker is",goMap:"Go to the map",defends:"Defends",attacks:"Attacks",hint:"Play it in FC27, then pick the winner. The winner takes all of the loser's land.",won:"{t} won",champion:"Champion of Europe",holds:"Holds all 36 blocks after {n} matches.",wheelAria:"Wheel of teams that still hold land",mapAria:"Hexagon map of Champions League teams",language:"Language"},
+  tr:{title:"Futbol Emperyalizmi",wheel:"Çarkı çevir",arrow:"Oku çevir",cancel:"Turu iptal et",undo:"Geri al",newGame:"Yeni oyun",confirmQ:"Takımlar karıştırılsın ve tüm sonuçlar silinsin mi?",confirmYes:"Yeni oyuna başla",confirmNo:"Oynamaya devam et",whoAttacks:"Kim saldırıyor?",spin:"Çevir",close:"Kapat",attackerIs:"Saldıran takım",goMap:"Haritaya git",defends:"Savunuyor",attacks:"Saldırıyor",hint:"Maçı FC27'de oyna, sonra kazananı seç. Kazanan, kaybedenin tüm topraklarını alır.",won:"{t} kazandı",champion:"Avrupa Şampiyonu",holds:"{n} maçın sonunda 36 bölgenin hepsine sahip.",wheelAria:"Toprağı olan takımların çarkı",mapAria:"Şampiyonlar Ligi takımlarının altıgen haritası",language:"Dil"},
+  de:{title:"Fußball-Imperialismus",wheel:"Rad drehen",arrow:"Pfeil drehen",cancel:"Zug abbrechen",undo:"Rückgängig",newGame:"Neues Spiel",confirmQ:"Neu mischen und alle Ergebnisse löschen?",confirmYes:"Neues Spiel starten",confirmNo:"Weiterspielen",whoAttacks:"Wer greift an?",spin:"Drehen",close:"Schließen",attackerIs:"Der Angreifer ist",goMap:"Zur Karte",defends:"Verteidigt",attacks:"Greift an",hint:"Spiel es in FC27 und wähle dann den Sieger. Der Sieger übernimmt das gesamte Gebiet des Verlierers.",won:"{t} gewinnt",champion:"Europas Champion",holds:"Besitzt nach {n} Spielen alle 36 Felder.",wheelAria:"Rad der Teams, die noch Gebiet haben",mapAria:"Sechseckkarte der Champions-League-Teams",language:"Sprache"},
+  fr:{title:"Impérialisme du football",wheel:"Tourner la roue",arrow:"Tourner la flèche",cancel:"Annuler le tour",undo:"Revenir",newGame:"Nouvelle partie",confirmQ:"Mélanger et effacer tous les résultats ?",confirmYes:"Lancer une nouvelle partie",confirmNo:"Continuer",whoAttacks:"Qui attaque ?",spin:"Tourner",close:"Fermer",attackerIs:"L'attaquant est",goMap:"Aller à la carte",defends:"Défend",attacks:"Attaque",hint:"Jouez-le sur FC27, puis choisissez le vainqueur. Le vainqueur prend tout le territoire du perdant.",won:"{t} gagne",champion:"Champion d'Europe",holds:"Possède les 36 cases après {n} matchs.",wheelAria:"Roue des équipes qui ont encore un territoire",mapAria:"Carte hexagonale des équipes de Ligue des champions",language:"Langue"},
+  it:{title:"Imperialismo calcistico",wheel:"Gira la ruota",arrow:"Gira la freccia",cancel:"Annulla turno",undo:"Indietro",newGame:"Nuova partita",confirmQ:"Rimescolare e cancellare tutti i risultati?",confirmYes:"Inizia nuova partita",confirmNo:"Continua a giocare",whoAttacks:"Chi attacca?",spin:"Gira",close:"Chiudi",attackerIs:"L'attaccante è",goMap:"Vai alla mappa",defends:"Difende",attacks:"Attacca",hint:"Giocala su FC27, poi scegli il vincitore. Il vincitore prende tutto il territorio dello sconfitto.",won:"Vince {t}",champion:"Campione d'Europa",holds:"Possiede tutte le 36 caselle dopo {n} partite.",wheelAria:"Ruota delle squadre che hanno ancora territorio",mapAria:"Mappa esagonale delle squadre di Champions League",language:"Lingua"},
+  es:{title:"Imperialismo futbolístico",wheel:"Girar la ruleta",arrow:"Girar la flecha",cancel:"Cancelar turno",undo:"Deshacer",newGame:"Nueva partida",confirmQ:"¿Mezclar y borrar todos los resultados?",confirmYes:"Empezar nueva partida",confirmNo:"Seguir jugando",whoAttacks:"¿Quién ataca?",spin:"Girar",close:"Cerrar",attackerIs:"El atacante es",goMap:"Ir al mapa",defends:"Defiende",attacks:"Ataca",hint:"Juega el partido en FC27 y elige al ganador. El ganador se queda con todo el territorio del perdedor.",won:"Gana {t}",champion:"Campeón de Europa",holds:"Tiene las 36 casillas tras {n} partidos.",wheelAria:"Ruleta de los equipos que aún tienen territorio",mapAria:"Mapa hexagonal de los equipos de la Champions League",language:"Idioma"}
 };
 const LKEY="football-imperialism-lang";
 let lang="en"; try{const v=localStorage.getItem(LKEY); if(STR[v]) lang=v;}catch(e){}
@@ -349,6 +348,8 @@ async function spinArrow(){
   arrowRot=final;
   S.angle=Math.round(final);S.defHex=defenderFor(S.att,final);S.def=S.owner[S.defHex];S.phase="match";save();
   busy=false; renderAll();
+  await new Promise(r=>setTimeout(r,reduced?100:700)); // a beat to see where the arrow landed
+  openMatch();
 }
 
 /* ---------- match ---------- */
@@ -363,10 +364,10 @@ function openMatch(){
     </div>
     <div class="hint">${L("hint")}</div>
     <div class="row"><button class="primary" id="wD">${L("won").replace("{t}",tn(d))}</button><button class="primary" id="wA">${L("won").replace("{t}",tn(a))}</button></div>
-    <button id="pClose">${L("close")}</button></div></div>`;
+    <button id="pCancel">${L("cancel")}</button></div></div>`;
   document.getElementById("wD").onclick=()=>result(d.id);
   document.getElementById("wA").onclick=()=>result(a.id);
-  document.getElementById("pClose").onclick=closePop;
+  document.getElementById("pCancel").onclick=()=>{closePop();cancelTurn()};
 }
 async function result(win){
   closePop(); busy=true; renderSide();
@@ -385,7 +386,7 @@ async function result(win){
 function renderSide(){
   const ph=S.phase;
   const set=(id,ready)=>{const b=document.getElementById(id);b.disabled=busy||!ready;b.classList.toggle("ready",!busy&&ready)};
-  set("bWheel",ph==="wheel");set("bArrow",ph==="arrow");set("bMatch",ph==="match");
+  set("bWheel",ph==="wheel");set("bArrow",ph==="arrow");
   document.getElementById("bCancel").disabled=busy||!(ph==="arrow"||ph==="match");
   document.getElementById("bUndo").disabled=busy||!S.log.length;
   document.getElementById("bNew").disabled=busy;
@@ -399,13 +400,14 @@ function renderSide(){
 function renderAll(){renderMap();renderSide()}
 document.getElementById("bWheel").onclick=openWheel;
 document.getElementById("bArrow").onclick=spinArrow;
-document.getElementById("bMatch").onclick=openMatch;
-document.getElementById("bCancel").onclick=async()=>{S.att=S.def=S.defHex=null;S.phase="wheel";save();renderAll();busy=true;await zoomTo(FULL);busy=false;renderSide()};
+async function cancelTurn(){S.att=S.def=S.defHex=null;S.phase="wheel";save();renderAll();busy=true;await zoomTo(FULL);busy=false;renderSide()}
+document.getElementById("bCancel").onclick=cancelTurn;
 document.getElementById("bUndo").onclick=async()=>{const e=S.log.pop();if(!e)return;S.owner=e.prev;S.att=S.def=S.defHex=null;S.phase="wheel";save();renderAll();busy=true;await zoomTo(FULL);busy=false;renderSide()};
 document.getElementById("bNew").onclick=()=>{confirmNew=true;renderSide()};
 
 if(S.att&&(S.phase==="arrow"||S.phase==="match")) view=focusBox(S.att);
 applyLang(); renderAll(); loadLogos();
+if(S.phase==="match") openMatch(); // reopen an unfinished match after a reload
 document.fonts&&document.fonts.ready.then(renderAll);
 </script>
 </body>
