@@ -329,8 +329,8 @@ async function spin(cv){
   const n=alive().length,seg=2*Math.PI/n,pick=Math.floor(Math.random()*n);
   const start=wheelRot; let end=-(pick*seg+seg*(.15+Math.random()*.7));
   while(end>start-2*Math.PI*7) end-=2*Math.PI;
-  let lastSlice=null;
-  await animate(SPIN_MS,t=>{wheelRot=start+(end-start)*ease(t);drawWheel(cv);const s=atPointer().id;if(s!==lastSlice){if(lastSlice!==null)tick(.7);lastSlice=s}});
+  const click=spinTicker();
+  await animate(SPIN_MS,t=>{wheelRot=start+(end-start)*ease(t);drawWheel(cv);click(t)});
   wheelRot=((end%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
   const t=atPointer(); drawWheel(cv,t.id); fanfare();
   await new Promise(r=>setTimeout(r,700));
@@ -347,8 +347,8 @@ async function spinArrow(){
   if(busy||S.phase!=="arrow") return; busy=true; renderSide();
   const start=arrowRot%360, final=Math.random()*360;
   const end=start+360*(5+Math.floor(Math.random()*3))+((final-start)%360+360)%360;
-  let lastStep=Math.floor(start/30);
-  await animate(SPIN_MS,t=>{arrowRot=start+(end-start)*ease(t);needle.setAttribute("transform",`rotate(${arrowRot})`);const st=Math.floor(arrowRot/30);if(st!==lastStep){lastStep=st;tick(.7)}});
+  const click=spinTicker();
+  await animate(SPIN_MS,t=>{arrowRot=start+(end-start)*ease(t);needle.setAttribute("transform",`rotate(${arrowRot})`);click(t)});
   arrowRot=final;
   S.angle=Math.round(final);S.defHex=defenderFor(S.att,final);S.def=S.owner[S.defHex];S.phase="match";save();
   busy=false; renderAll();
@@ -424,6 +424,12 @@ function tick(pitch=.7){ // soft wooden click, like a peg hitting the pointer
   f.type="highpass"; f.frequency.value=300;
   g.gain.setValueAtTime(.0001,now); g.gain.exponentialRampToValueAtTime(.12,now+.003); g.gain.exponentialRampToValueAtTime(.0001,now+.06);
   o.connect(f).connect(g).connect(a.destination); o.start(now); o.stop(now+.07);
+}
+function spinTicker(){ // clicks spaced by spin speed: quick at the start, further apart as it slows
+  let next=0;
+  return t=>{ const now=performance.now(), speed=Math.pow(1-t,2); // ease-out cubic: speed falls with (1-t)^2
+    if(now<next) return; const gap=50/Math.max(speed,1e-6); if(gap>1300) return;
+    tick(.7); next=now+gap; };
 }
 function fanfare(){ // bright rising chord for the reveal
   const a=audio(); if(!a) return; const now=a.currentTime;
