@@ -52,6 +52,12 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
 .log b{color:var(--ink)}
 .log .empty{color:var(--muted)}
 .confirm{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--silver)}
+.lang{position:relative}
+.lang>button{display:inline-flex;align-items:center;gap:7px}
+.flag{width:21px;height:14px;border-radius:2px;display:block;box-shadow:0 0 0 1px rgba(255,255,255,.25)}
+.langmenu{position:absolute;bottom:calc(100% + 8px);right:0;background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:6px;display:grid;gap:2px;min-width:120px;box-shadow:0 12px 30px rgba(0,0,0,.45);z-index:5}
+.langmenu button{display:flex;align-items:center;gap:9px;border:0;background:transparent;border-radius:8px;font-size:13px;padding:7px 10px;text-align:left}
+.langmenu button:hover,.langmenu button.on{background:var(--panel-2)}
 .danger{background:var(--red);border-color:transparent;color:#fff}
 /* popups */
 .overlay{position:fixed;inset:0;background:rgba(4,7,26,.78);backdrop-filter:blur(4px);display:grid;place-items:center;z-index:10;padding:24px}
@@ -80,13 +86,14 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
 <div class="app">
   <main class="stage"><svg id="map" role="img" aria-label="Hexagon map of Champions League teams"></svg></main>
   <nav class="bar">
-    <button class="big" id="bWheel"><i>1</i>Spin the wheel</button>
-    <button class="big" id="bArrow"><i>2</i>Spin the arrow</button>
-    <button class="big" id="bMatch"><i>3</i>Show the match</button>
+    <button class="big" id="bWheel"><i>1</i><span data-t="wheel">Spin the wheel</span></button>
+    <button class="big" id="bArrow"><i>2</i><span data-t="arrow">Spin the arrow</span></button>
+    <button class="big" id="bMatch"><i>3</i><span data-t="match">Show the match</span></button>
     <span class="sep"></span>
-    <button class="small" id="bCancel">Cancel turn</button>
-    <button class="small" id="bUndo">Undo</button>
-    <button class="small" id="bNew">New game</button>
+    <button class="small" id="bCancel" data-t="cancel">Cancel turn</button>
+    <button class="small" id="bUndo" data-t="undo">Undo</button>
+    <button class="small" id="bNew" data-t="newGame">New game</button>
+    <span class="lang" id="lang"></span>
     <span id="confirm"></span>
   </nav>
 </div>
@@ -94,6 +101,41 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
 
 <script>
 /* 2026/27 Champions League league phase (UEFA list). Put a logo at logos/<id>.png (or .svg) to replace the badge. */
+/* ---------- languages (team names stay as they are) ---------- */
+const FLAGS={
+  tr:`<svg class="flag" viewBox="0 0 30 20"><rect width="30" height="20" fill="#E30A17"/><circle cx="11" cy="10" r="5" fill="#fff"/><circle cx="12.3" cy="10" r="4" fill="#E30A17"/><polygon points="16.40,7.70 16.96,9.23 18.59,9.29 17.30,10.29 17.75,11.86 16.40,10.95 15.05,11.86 15.50,10.29 14.21,9.29 15.84,9.23" fill="#fff"/></svg>`,
+  de:`<svg class="flag" viewBox="0 0 30 20"><rect width="30" height="7" fill="#000"/><rect y="6.67" width="30" height="6.67" fill="#DD0000"/><rect y="13.33" width="30" height="6.67" fill="#FFCE00"/></svg>`,
+  en:`<svg class="flag" viewBox="0 0 30 20"><rect width="30" height="20" fill="#fff"/><rect x="13" width="4" height="20" fill="#CE1124"/><rect y="8" width="30" height="4" fill="#CE1124"/></svg>`,
+  fr:`<svg class="flag" viewBox="0 0 30 20"><rect width="10" height="20" fill="#0055A4"/><rect x="10" width="10" height="20" fill="#fff"/><rect x="20" width="10" height="20" fill="#EF4135"/></svg>`,
+  it:`<svg class="flag" viewBox="0 0 30 20"><rect width="10" height="20" fill="#009246"/><rect x="10" width="10" height="20" fill="#fff"/><rect x="20" width="10" height="20" fill="#CE2B37"/></svg>`,
+  es:`<svg class="flag" viewBox="0 0 30 20"><rect width="30" height="20" fill="#AA151B"/><rect y="5" width="30" height="10" fill="#F1BF00"/></svg>`
+};
+const LANGS=[["tr","TUR"],["de","GER"],["en","ENG"],["fr","FRA"],["it","ITA"],["es","ESP"]];
+const STR={
+  en:{title:"Football Imperialism",wheel:"Spin the wheel",arrow:"Spin the arrow",match:"Show the match",cancel:"Cancel turn",undo:"Undo",newGame:"New game",confirmQ:"Reshuffle and clear all results?",confirmYes:"Start new game",confirmNo:"Keep playing",whoAttacks:"Who attacks?",spin:"Spin",close:"Close",attackerIs:"The attacker is",goMap:"Go to the map",defends:"Defends",attacks:"Attacks",hint:"Play it in FC27, then pick the winner. The winner takes all of the loser's land.",won:"{t} won",champion:"Champion of Europe",holds:"Holds all 36 blocks after {n} matches.",wheelAria:"Wheel of teams that still hold land",mapAria:"Hexagon map of Champions League teams",language:"Language"},
+  tr:{title:"Futbol Emperyalizmi",wheel:"Çarkı çevir",arrow:"Oku çevir",match:"Maçı göster",cancel:"Turu iptal et",undo:"Geri al",newGame:"Yeni oyun",confirmQ:"Takımlar karıştırılsın ve tüm sonuçlar silinsin mi?",confirmYes:"Yeni oyuna başla",confirmNo:"Oynamaya devam et",whoAttacks:"Kim saldırıyor?",spin:"Çevir",close:"Kapat",attackerIs:"Saldıran takım",goMap:"Haritaya git",defends:"Savunuyor",attacks:"Saldırıyor",hint:"Maçı FC27'de oyna, sonra kazananı seç. Kazanan, kaybedenin tüm topraklarını alır.",won:"{t} kazandı",champion:"Avrupa Şampiyonu",holds:"{n} maçın sonunda 36 bölgenin hepsine sahip.",wheelAria:"Toprağı olan takımların çarkı",mapAria:"Şampiyonlar Ligi takımlarının altıgen haritası",language:"Dil"},
+  de:{title:"Fußball-Imperialismus",wheel:"Rad drehen",arrow:"Pfeil drehen",match:"Spiel zeigen",cancel:"Zug abbrechen",undo:"Rückgängig",newGame:"Neues Spiel",confirmQ:"Neu mischen und alle Ergebnisse löschen?",confirmYes:"Neues Spiel starten",confirmNo:"Weiterspielen",whoAttacks:"Wer greift an?",spin:"Drehen",close:"Schließen",attackerIs:"Der Angreifer ist",goMap:"Zur Karte",defends:"Verteidigt",attacks:"Greift an",hint:"Spiel es in FC27 und wähle dann den Sieger. Der Sieger übernimmt das gesamte Gebiet des Verlierers.",won:"{t} gewinnt",champion:"Europas Champion",holds:"Besitzt nach {n} Spielen alle 36 Felder.",wheelAria:"Rad der Teams, die noch Gebiet haben",mapAria:"Sechseckkarte der Champions-League-Teams",language:"Sprache"},
+  fr:{title:"Impérialisme du football",wheel:"Tourner la roue",arrow:"Tourner la flèche",match:"Voir le match",cancel:"Annuler le tour",undo:"Revenir",newGame:"Nouvelle partie",confirmQ:"Mélanger et effacer tous les résultats ?",confirmYes:"Lancer une nouvelle partie",confirmNo:"Continuer",whoAttacks:"Qui attaque ?",spin:"Tourner",close:"Fermer",attackerIs:"L'attaquant est",goMap:"Aller à la carte",defends:"Défend",attacks:"Attaque",hint:"Jouez-le sur FC27, puis choisissez le vainqueur. Le vainqueur prend tout le territoire du perdant.",won:"{t} gagne",champion:"Champion d'Europe",holds:"Possède les 36 cases après {n} matchs.",wheelAria:"Roue des équipes qui ont encore un territoire",mapAria:"Carte hexagonale des équipes de Ligue des champions",language:"Langue"},
+  it:{title:"Imperialismo calcistico",wheel:"Gira la ruota",arrow:"Gira la freccia",match:"Mostra la partita",cancel:"Annulla turno",undo:"Indietro",newGame:"Nuova partita",confirmQ:"Rimescolare e cancellare tutti i risultati?",confirmYes:"Inizia nuova partita",confirmNo:"Continua a giocare",whoAttacks:"Chi attacca?",spin:"Gira",close:"Chiudi",attackerIs:"L'attaccante è",goMap:"Vai alla mappa",defends:"Difende",attacks:"Attacca",hint:"Giocala su FC27, poi scegli il vincitore. Il vincitore prende tutto il territorio dello sconfitto.",won:"Vince {t}",champion:"Campione d'Europa",holds:"Possiede tutte le 36 caselle dopo {n} partite.",wheelAria:"Ruota delle squadre che hanno ancora territorio",mapAria:"Mappa esagonale delle squadre di Champions League",language:"Lingua"},
+  es:{title:"Imperialismo futbolístico",wheel:"Girar la ruleta",arrow:"Girar la flecha",match:"Ver el partido",cancel:"Cancelar turno",undo:"Deshacer",newGame:"Nueva partida",confirmQ:"¿Mezclar y borrar todos los resultados?",confirmYes:"Empezar nueva partida",confirmNo:"Seguir jugando",whoAttacks:"¿Quién ataca?",spin:"Girar",close:"Cerrar",attackerIs:"El atacante es",goMap:"Ir al mapa",defends:"Defiende",attacks:"Ataca",hint:"Juega el partido en FC27 y elige al ganador. El ganador se queda con todo el territorio del perdedor.",won:"Gana {t}",champion:"Campeón de Europa",holds:"Tiene las 36 casillas tras {n} partidos.",wheelAria:"Ruleta de los equipos que aún tienen territorio",mapAria:"Mapa hexagonal de los equipos de la Champions League",language:"Idioma"}
+};
+const LKEY="football-imperialism-lang";
+let lang="en"; try{const v=localStorage.getItem(LKEY); if(STR[v]) lang=v;}catch(e){}
+let langOpen=false;
+const L=k=>STR[lang][k]??STR.en[k];
+function applyLang(){
+  document.documentElement.lang=lang; document.title=L("title");
+  document.getElementById("map").setAttribute("aria-label",L("mapAria"));
+  document.querySelectorAll("[data-t]").forEach(e=>e.textContent=L(e.dataset.t));
+  const code=LANGS.find(l=>l[0]===lang)[1];
+  const box=document.getElementById("lang");
+  box.innerHTML=`<button class="small" id="langBtn" aria-haspopup="true" aria-expanded="${langOpen}" aria-label="${L("language")}">${FLAGS[lang]}${code}</button>`+
+    (langOpen?`<div class="langmenu" role="menu">${LANGS.map(([k,c])=>`<button role="menuitem" class="${k===lang?"on":""}" data-lang="${k}">${FLAGS[k]}${c}</button>`).join("")}</div>`:"");
+  document.getElementById("langBtn").onclick=e=>{e.stopPropagation();langOpen=!langOpen;applyLang()};
+  box.querySelectorAll("[data-lang]").forEach(b=>b.onclick=e=>{e.stopPropagation();lang=b.dataset.lang;langOpen=false;try{localStorage.setItem(LKEY,lang)}catch(_){}applyLang();renderSide()});
+}
+document.addEventListener("click",()=>{if(langOpen){langOpen=false;applyLang()}});
+
 const TEAMS = [
   ["aek","AEK Athens","AEK","#F2C200","#141414"],
   ["arsenal","Arsenal","ARS","#EF0107","#FFFFFF"],
@@ -147,6 +189,7 @@ function lum(hex){const n=parseInt(hex.slice(1),16);const c=[n>>16,(n>>8)&255,n&
 const textOn=h=>lum(h)>.45?"#0B1030":"#FFFFFF";
 const shade=(hex,f)=>{const n=parseInt(hex.slice(1),16);const ch=[n>>16,(n>>8)&255,n&255].map(v=>Math.round(f<0?v*(1+f):v+(255-v)*f));return "#"+ch.map(v=>v.toString(16).padStart(2,"0")).join("")};
 const ease=t=>1-Math.pow(1-t,3); // fast start, slow finish
+const tn=t=>`<span lang="en">${esc(t.name)}</span>`; // team names keep their own spelling in every language
 const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 /* ---------- state ---------- */
@@ -272,9 +315,9 @@ const pop=document.getElementById("popup");
 function closePop(){pop.innerHTML=""}
 function openWheel(){
   if(busy||S.phase!=="wheel") return;
-  pop.innerHTML=`<div class="overlay"><div class="pop"><h3>Who attacks?</h3>
-    <div class="wheelbox"><canvas id="wheel" aria-label="Wheel of teams that still hold land"></canvas><div class="pointer"></div></div>
-    <div class="row"><button class="primary" id="pSpin">Spin</button><button id="pClose">Close</button></div></div></div>`;
+  pop.innerHTML=`<div class="overlay"><div class="pop"><h3>${L("whoAttacks")}</h3>
+    <div class="wheelbox"><canvas id="wheel" aria-label="${L("wheelAria")}"></canvas><div class="pointer"></div></div>
+    <div class="row"><button class="primary" id="pSpin">${L("spin")}</button><button id="pClose">${L("close")}</button></div></div></div>`;
   const cv=document.getElementById("wheel"); drawWheel(cv);
   document.getElementById("pClose").onclick=()=>{if(!busy)closePop()};
   document.getElementById("pSpin").onclick=cv.onclick=()=>spin(cv);
@@ -290,9 +333,9 @@ async function spin(cv){
   const t=atPointer(); drawWheel(cv,t.id);
   await new Promise(r=>setTimeout(r,700));
   S.att=t.id;S.def=null;S.defHex=null;S.angle=0;arrowRot=0;S.phase="arrow";save();busy=false;
-  pop.innerHTML=`<div class="overlay"><div class="pop"><h3>The attacker is</h3>
-    <div class="winner">${crestSVG(t)}<div class="name">${esc(t.name)}</div></div>
-    <button class="primary" id="pGo">Go to the map</button></div></div>`;
+  pop.innerHTML=`<div class="overlay"><div class="pop"><h3>${L("attackerIs")}</h3>
+    <div class="winner">${crestSVG(t)}<div class="name">${tn(t)}</div></div>
+    <button class="primary" id="pGo">${L("goMap")}</button></div></div>`;
   document.getElementById("pGo").onclick=async()=>{closePop();renderAll();busy=true;renderSide();await zoomTo(focusBox(S.att));busy=false;renderSide()};
   renderSide();
 }
@@ -314,13 +357,13 @@ function openMatch(){
   const a=T[S.att],d=T[S.def];
   pop.innerHTML=`<div class="overlay"><div class="pop">
     <div class="fixture">
-      <div class="side-t">${crestSVG(d)}<div class="nm">${esc(d.name)}</div><div class="role">Defends</div></div>
+      <div class="side-t">${crestSVG(d)}<div class="nm">${tn(d)}</div><div class="role">${L("defends")}</div></div>
       <div class="dash">-</div>
-      <div class="side-t">${crestSVG(a)}<div class="nm">${esc(a.name)}</div><div class="role">Attacks</div></div>
+      <div class="side-t">${crestSVG(a)}<div class="nm">${tn(a)}</div><div class="role">${L("attacks")}</div></div>
     </div>
-    <div class="hint">Play it in FC27, then pick the winner. The winner takes all of the loser's land.</div>
-    <div class="row"><button class="primary" id="wD">${esc(d.name)} won</button><button class="primary" id="wA">${esc(a.name)} won</button></div>
-    <button id="pClose">Close</button></div></div>`;
+    <div class="hint">${L("hint")}</div>
+    <div class="row"><button class="primary" id="wD">${L("won").replace("{t}",tn(d))}</button><button class="primary" id="wA">${L("won").replace("{t}",tn(a))}</button></div>
+    <button id="pClose">${L("close")}</button></div></div>`;
   document.getElementById("wD").onclick=()=>result(d.id);
   document.getElementById("wA").onclick=()=>result(a.id);
   document.getElementById("pClose").onclick=closePop;
@@ -335,7 +378,7 @@ async function result(win){
   S.log.push({att:S.att,def:S.def,win,lose,taken:lost.length,prev});
   S.att=S.def=S.defHex=null;S.phase=alive().length<=1?"over":"wheel";save();
   renderAll(); await zoomTo(FULL); busy=false; renderAll();
-  if(S.phase==="over"){const c=alive()[0];pop.innerHTML=`<div class="overlay"><div class="pop"><h3>Champion of Europe</h3><div class="winner">${crestSVG(c)}<div class="name">${esc(c.name)}</div></div><div class="hint">Holds all 36 blocks after ${S.log.length} matches.</div><button class="primary" id="pOk">Close</button></div></div>`;document.getElementById("pOk").onclick=closePop}
+  if(S.phase==="over"){const c=alive()[0];pop.innerHTML=`<div class="overlay"><div class="pop"><h3>${L("champion")}</h3><div class="winner">${crestSVG(c)}<div class="name">${tn(c)}</div></div><div class="hint">${L("holds").replace("{n}",S.log.length)}</div><button class="primary" id="pOk">${L("close")}</button></div></div>`;document.getElementById("pOk").onclick=closePop}
 }
 
 /* ---------- side panel ---------- */
@@ -348,7 +391,7 @@ function renderSide(){
   document.getElementById("bNew").disabled=busy;
   const cf=document.getElementById("confirm");
   if(confirmNew){
-    cf.innerHTML=`<span class="confirm">Reshuffle and clear all results? <button class="small danger" id="cYes">Start new game</button><button class="small" id="cNo">Keep playing</button></span>`;
+    cf.innerHTML=`<span class="confirm">${L("confirmQ")} <button class="small danger" id="cYes">${L("confirmYes")}</button><button class="small" id="cNo">${L("confirmNo")}</button></span>`;
     document.getElementById("cYes").onclick=()=>{confirmNew=false;S=fresh();save();view=FULL.slice();renderAll()};
     document.getElementById("cNo").onclick=()=>{confirmNew=false;renderSide()};
   } else cf.innerHTML="";
@@ -362,7 +405,7 @@ document.getElementById("bUndo").onclick=async()=>{const e=S.log.pop();if(!e)ret
 document.getElementById("bNew").onclick=()=>{confirmNew=true;renderSide()};
 
 if(S.att&&(S.phase==="arrow"||S.phase==="match")) view=focusBox(S.att);
-renderAll(); loadLogos();
+applyLang(); renderAll(); loadLogos();
 document.fonts&&document.fonts.ready.then(renderAll);
 </script>
 </body>
