@@ -212,37 +212,36 @@ const hexesOf=id=>S.owner.map((o,i)=>o===id?i:-1).filter(i=>i>=0);
 /* one logo per team: odd land count -> the middle block, even -> the edge between the two middle blocks.
    Logos grow with the land, then shrink where needed so two logos never overlap. */
 const BASE_LOGO=R*1.02;
-function logoSpot(id){
-  const hs=hexesOf(id), n=hs.length, C=shape().cen;
-  const cx=hs.reduce((a,i)=>a+C[i].x,0)/n, cy=hs.reduce((a,i)=>a+C[i].y,0)/n;
-  const d=(x,y)=>Math.hypot(x-cx,y-cy);
-  if(n%2===0){
-    let best=null,bd=1e9;
-    for(const i of hs) for(const j of HEX[i].nb){ if(j<i||S.owner[j]!==id) continue;
-      const mx=(C[i].x+C[j].x)/2, my=(C[i].y+C[j].y)/2, dd=d(mx,my); if(dd<bd){bd=dd;best={x:mx,y:my}} }
-    if(best) return best;
-  }
-  const i=hs.reduce((b,k)=>d(C[k].x,C[k].y)<d(C[b].x,C[b].y)?k:b,hs[0]);
-  return {x:C[i].x,y:C[i].y};
+/* one logo per team, at the roomiest point of its whole land (the centre of the biggest circle that fits inside it,
+   leaning towards the land's middle), sized to grow with the land but never to cross into another team's land */
+const inPoly=(P,x,y)=>{let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const a=P[i],b=P[j];if((a.y>y)!==(b.y>y)&&x<(b.x-a.x)*(y-a.y)/(b.y-a.y)+a.x)c=!c}return c};
+let LOGO_CACHE={key:null,val:null};
+function logoFit(id){
+  const SH=shape(), hs=hexesOf(id), n=hs.length;
+  const walls=[]; SH.edgeList.forEach(e=>{const mine=S.owner[e.i]===id||(e.j>=0&&S.owner[e.j]===id);
+    if(mine&&(e.j<0||S.owner[e.i]!==S.owner[e.j])) walls.push(...e.pts)});
+  const clear=(x,y)=>{let m=1e9;for(const q of walls){const d=(q.x-x)**2+(q.y-y)**2;if(d<m)m=d}return Math.sqrt(m)};
+  const inside=(x,y)=>hs.some(i=>inPoly(SH.rings[i],x,y));
+  const cx=hs.reduce((a,i)=>a+SH.cen[i].x,0)/n, cy=hs.reduce((a,i)=>a+SH.cen[i].y,0)/n;
+  const score=(x,y)=>clear(x,y)-.2*Math.hypot(x-cx,y-cy);
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; hs.forEach(i=>SH.rings[i].forEach(p=>{x0=Math.min(x0,p.x);x1=Math.max(x1,p.x);y0=Math.min(y0,p.y);y1=Math.max(y1,p.y)}));
+  let best=null,bs=-1e9;
+  for(let x=x0;x<=x1;x+=12) for(let y=y0;y<=y1;y+=12){ if(!inside(x,y)) continue; const v=score(x,y); if(v>bs){bs=v;best={x,y}} }
+  if(!best) best={x:SH.cen[hs[0]].x,y:SH.cen[hs[0]].y};
+  for(const step of [6,3,1.5]){ let moved=true; while(moved){ moved=false;
+    for(const [dx,dy] of [[step,0],[-step,0],[0,step],[0,-step]]){const x=best.x+dx,y=best.y+dy;
+      if(inside(x,y)){const v=score(x,y);if(v>bs){bs=v;best={x,y};moved=true}}} } }
+  const want=Math.min(R*2.6,BASE_LOGO*(1+.3*Math.log2(n)));
+  const fit=(clear(best.x,best.y)-6)/.48; // the crest stays inside a circle of about half its width
+  return {x:best.x,y:best.y,s:Math.max(BASE_LOGO*.55,Math.min(want,fit))};
 }
 function logoLayout(){
-  const L0={};
-  alive().forEach(t=>{const n=hexesOf(t.id).length, p=logoSpot(t.id);
-    // keep the logo inside its own land: it may not reach into another team's block or off the map
-    let room=1e9; shape().edgeList.forEach(e=>{if(e.j>=0&&S.owner[e.i]===S.owner[e.j]) return;
-      e.pts.forEach(q=>room=Math.min(room,Math.hypot(q.x-p.x,q.y-p.y)-6))});
-    const want=Math.min(R*1.9,BASE_LOGO*(1+.22*Math.log2(n)));
-    L0[t.id]={x:p.x,y:p.y,s:Math.max(BASE_LOGO,Math.min(want,room/.5))}});
-  const ids=Object.keys(L0), GAP=8;
-  for(let pass=0;pass<6;pass++){ let moved=false;
-    for(let a=0;a<ids.length;a++) for(let b=a+1;b<ids.length;b++){
-      const A=L0[ids[a]],B=L0[ids[b]], dist=Math.hypot(A.x-B.x,A.y-B.y), need=(A.s+B.s)*.46+GAP;
-      if(dist<need){const k=Math.max(.3,(dist-GAP)/((A.s+B.s)*.46));A.s*=k;B.s*=k;moved=true}
-    }
-    if(!moved) break;
-  }
-  return L0;
+  const key=S.seed+":"+S.owner.join(",");
+  if(LOGO_CACHE.key===key) return LOGO_CACHE.val;
+  const L0={}; alive().forEach(t=>L0[t.id]=logoFit(t.id));
+  LOGO_CACHE={key,val:L0}; return L0;
 }
+const logoSpot=id=>{const l=logoLayout()[id];return {x:l.x,y:l.y}};
 const bearing=(p,b)=>{const c=shape().cen[b];return (Math.atan2(c.x-p.x,-(c.y-p.y))*180/Math.PI+360)%360};
 const angDiff=(a,b)=>{const d=Math.abs(a-b)%360;return d>180?360-d:d};
 function defenderFor(id,angle){
@@ -313,7 +312,7 @@ function buildShapes(seed){
   const cellD=rings.map(P=>"M"+P.map(p=>f(p.x)+","+f(p.y)).join("L")+"Z");
   const cen=rings.map(P=>{const a6=area(P)*6;let x=0,yy=0;P.forEach((p,k)=>{const q=P[(k+1)%P.length],cr=p.x*q.y-q.x*p.y;x+=(p.x+q.x)*cr;yy+=(p.y+q.y)*cr});return {x:x/a6,y:yy/a6}});
   const edgeList=E.map(e=>{const P=pts(e);return {i:e.cells[0],j:e.cells.length>1?e.cells[1]:-1,pts:P,d:"M"+P.map(p=>f(p.x)+","+f(p.y)).join("L")}});
-  return {seed,cellD,edgeList,cen,areas:rings.map(area)};
+  return {seed,cellD,edgeList,cen,rings,areas:rings.map(area)};
 }
 const shape=()=>(SHAPE&&SHAPE.seed===S.seed)?SHAPE:(SHAPE=buildShapes(S.seed));
 const defs=el("defs",{},svg);
