@@ -439,8 +439,14 @@ async function spinArrow(){
   const start=arrowRot%360, final=Math.random()*360;
   const end=start+360*(5+Math.floor(Math.random()*3))+((final-start)%360+360)%360;
   const click=spinTicker();
-  await animate(SPIN_MS,t=>{arrowRot=start+(end-start)*ease(t);needle.setAttribute("transform",`rotate(${arrowRot})`);click(t)});
-  arrowRot=final;
+  // spin a copy of the pointer on its own GPU layer above the map, so the map is not redrawn every frame
+  const a=logoSpot(S.att), sc=(logoLayout()[S.att]?.s||BASE_LOGO)/BASE_LOGO, m=svg.getScreenCTM(), Lr=R*1.8, px=2*Lr*sc*m.a;
+  const ov=document.createElement("div");
+  ov.style.cssText=`position:fixed;left:${m.a*a.x+m.e-px/2}px;top:${m.d*a.y+m.f-px/2}px;width:${px}px;height:${px}px;pointer-events:none;will-change:transform;z-index:5`;
+  ov.innerHTML=`<svg viewBox="${-Lr} ${-Lr} ${2*Lr} ${2*Lr}" width="100%" height="100%" style="display:block;overflow:visible">${needle.innerHTML}</svg>`;
+  document.body.appendChild(ov); needle.setAttribute("visibility","hidden");
+  await animate(SPIN_MS,t=>{arrowRot=start+(end-start)*ease(t);ov.style.transform=`rotate(${arrowRot}deg)`;click(t)});
+  arrowRot=final; needle.setAttribute("transform",`rotate(${arrowRot})`); needle.removeAttribute("visibility"); ov.remove();
   S.angle=Math.round(final);S.defHex=defenderFor(S.att,final);S.def=S.owner[S.defHex];S.phase="match";save();
   busy=false; renderAll();
   await new Promise(r=>setTimeout(r,reduced?100:700)); // a beat to see where the arrow landed
