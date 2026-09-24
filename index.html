@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Football Imperialism</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --night:#070B24; --deep:#0C1440; --panel:#111A4D; --panel-2:#18235E; --edge:#27347A;
+  --ink:#EEF1FB; --muted:#9AA5CF; --silver:#C8CFE6; --cyan:#35D6FF; --gold:#F5C542; --red:#FF4B5C;
+  --display:"Barlow Condensed","Arial Narrow",Impact,sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:radial-gradient(1200px 700px at 40% 45%,#15206A 0%,var(--deep) 45%,var(--night) 100%);color:var(--ink);font-family:var(--body);font-size:16px;overflow:hidden}
+.app{height:100%;display:grid;grid-template-columns:minmax(0,1fr) 340px}
+.stage{position:relative;min-width:0;min-height:0;padding:24px 8px 24px 24px;display:flex;align-items:center;justify-content:center}
+#map{width:100%;height:100%;display:block}
+.hex{stroke:var(--night);stroke-width:7;stroke-linejoin:round;transition:filter .4s,opacity .4s}
+.hex.dim{opacity:.35}
+.hex.flash{animation:flash .45s ease-in-out 4}
+@keyframes flash{50%{filter:brightness(2.2)}}
+.tag{font-family:var(--display);font-weight:800;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.side{background:linear-gradient(180deg,var(--panel),#0D1540);border-left:1px solid var(--edge);padding:24px 22px;display:flex;flex-direction:column;gap:18px;overflow:auto}
+.brand{font-family:var(--display);font-weight:800;font-size:34px;line-height:.9;text-transform:uppercase;letter-spacing:.02em}
+.brand span{color:var(--cyan);display:block}
+.meta{display:flex;gap:18px;color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.08em}
+.meta b{display:block;font-family:var(--display);font-size:30px;color:var(--ink);letter-spacing:0;line-height:1}
+.steps{display:flex;flex-direction:column;gap:10px}
+button{font:inherit;color:var(--ink);background:var(--panel-2);border:1px solid var(--edge);border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:600}
+button:hover:not(:disabled){border-color:var(--silver)}
+button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+button:disabled{opacity:.35;cursor:not-allowed}
+.big{display:grid;grid-template-columns:34px 1fr;align-items:center;gap:12px;text-align:left;font-family:var(--display);font-weight:700;font-size:24px;text-transform:uppercase;letter-spacing:.03em;padding:14px 16px}
+.big i{font-style:normal;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--edge);font-size:18px}
+.big.ready{background:var(--cyan);color:#061032;border-color:transparent;box-shadow:0 0 0 4px rgba(53,214,255,.18)}
+.big.ready i{background:#061032;color:var(--cyan)}
+.now{background:var(--panel-2);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;font-size:14px;color:var(--muted);min-height:74px}
+.now b{color:var(--ink);font-size:16px;display:block}
+.crest{width:50px;height:50px;flex:none}
+.small{font-size:14px;padding:8px 12px}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0}
+.log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--silver)}
+.log b{color:var(--ink)}
+.log .empty{color:var(--muted)}
+.confirm{background:var(--panel-2);border:1px solid var(--edge);border-radius:12px;padding:12px;font-size:14px;display:flex;flex-direction:column;gap:10px}
+.danger{background:var(--red);border-color:transparent;color:#fff}
+/* popups */
+.overlay{position:fixed;inset:0;background:rgba(4,7,26,.78);backdrop-filter:blur(4px);display:grid;place-items:center;z-index:10;padding:24px}
+.pop{background:linear-gradient(180deg,#16215F,#0D1545);border:1px solid var(--edge);border-radius:22px;padding:28px 34px;display:flex;flex-direction:column;align-items:center;gap:20px;max-width:100%;max-height:100%;box-shadow:0 30px 80px rgba(0,0,0,.5);animation:pop .35s cubic-bezier(.2,1.3,.4,1)}
+@keyframes pop{from{transform:scale(.85);opacity:0}}
+.pop h3{font-family:var(--display);font-weight:800;font-size:28px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:0}
+.wheelbox{position:relative;width:min(70vh,640px,80vw);aspect-ratio:1}
+#wheel{width:100%;height:100%;display:block;cursor:pointer}
+.pointer{position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:20px solid transparent;border-right:20px solid transparent;border-top:38px solid var(--gold);filter:drop-shadow(0 3px 4px rgba(0,0,0,.6))}
+.winner{display:flex;flex-direction:column;align-items:center;gap:14px}
+.winner .crest{width:min(34vh,300px);height:min(34vh,300px)}
+.winner .name{font-family:var(--display);font-weight:800;font-size:clamp(40px,6vw,72px);text-transform:uppercase;line-height:1}
+.primary{background:var(--cyan);color:#061032;border-color:transparent;font-family:var(--display);font-weight:800;font-size:24px;text-transform:uppercase;letter-spacing:.05em;padding:12px 28px}
+.fixture{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:clamp(16px,4vw,60px)}
+.fixture .side-t{display:flex;flex-direction:column;align-items:center;gap:12px;min-width:0}
+.fixture .crest{width:min(28vh,240px);height:min(28vh,240px)}
+.fixture .nm{font-family:var(--display);font-weight:800;font-size:clamp(26px,3.4vw,44px);text-transform:uppercase;text-align:center;line-height:1}
+.fixture .role{font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);font-weight:700}
+.fixture .dash{font-family:var(--display);font-weight:800;font-size:clamp(60px,9vw,120px);color:var(--silver);line-height:1}
+.hint{color:var(--muted);font-size:14px;text-align:center}
+@media (max-width:900px){
+  body{overflow:auto}
+  .app{grid-template-columns:1fr;height:auto}
+  .stage{height:62vh;padding:12px 16px}
+  .side{border-left:0;border-top:1px solid var(--edge)}
+}
+@media (prefers-reduced-motion:reduce){.pop{animation:none}.hex.flash{animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="stage"><svg id="map" role="img" aria-label="Hexagon map of Champions League teams"></svg></main>
+  <aside class="side">
+    <div class="brand">Football<span>Imperialism</span></div>
+    <div class="meta"><div><b id="mAlive">36</b>teams left</div><div><b id="mPlayed">0</b>matches</div></div>
+    <div class="steps">
+      <button class="big" id="bWheel"><i>1</i>Spin the wheel</button>
+      <button class="big" id="bArrow"><i>2</i>Spin the arrow</button>
+      <button class="big" id="bMatch"><i>3</i>Show the match</button>
+    </div>
+    <div class="now" id="now"></div>
+    <div class="row">
+      <button class="small" id="bCancel">Cancel this turn</button>
+      <button class="small" id="bUndo">Undo last result</button>
+      <button class="small" id="bNew">New game</button>
+    </div>
+    <div id="confirm"></div>
+    <h2>Results</h2>
+    <ol class="log" id="log"></ol>
+  </aside>
+</div>
+<div id="popup"></div>
+
+<script>
+/* 2026/27 Champions League league phase (UEFA list). Put a logo at logos/<id>.png (or .svg) to replace the badge. */
+const TEAMS = [
+  ["aek","AEK Athens","AEK","#F2C200","#141414"],
+  ["arsenal","Arsenal","ARS","#EF0107","#FFFFFF"],
+  ["aston-villa","Aston Villa","AVL","#670E36","#95BFE5"],
+  ["atletico","Atlético de Madrid","ATM","#CB3524","#272E61"],
+  ["barcelona","Barcelona","BAR","#A50044","#004D98"],
+  ["bayern","Bayern München","FCB","#DC052D","#FFFFFF"],
+  ["bodo-glimt","Bodø/Glimt","BOD","#FFD700","#141414"],
+  ["dortmund","Borussia Dortmund","BVB","#FDE100","#141414"],
+  ["club-brugge","Club Brugge","CLB","#0A6ABF","#141414"],
+  ["como","Como","COM","#1B3F8F","#FFFFFF"],
+  ["fenerbahce","Fenerbahçe","FB","#12275E","#FFE000"],
+  ["feyenoord","Feyenoord","FEY","#E00000","#FFFFFF"],
+  ["galatasaray","Galatasaray","GS","#A6192E","#F4B223"],
+  ["inter","Inter","INT","#0068A8","#141414"],
+  ["lask","LASK","LASK","#1A1A1A","#FFFFFF"],
+  ["leipzig","RB Leipzig","RBL","#DD0741","#FFFFFF"],
+  ["lens","Lens","RCL","#FFE500","#E30613"],
+  ["lille","Lille","LOSC","#E01E13","#1B2A55"],
+  ["liverpool","Liverpool","LIV","#C8102E","#F6EB61"],
+  ["man-city","Manchester City","MCI","#6CABDD","#FFFFFF"],
+  ["man-united","Manchester United","MUN","#DA291C","#FBE122"],
+  ["napoli","Napoli","NAP","#12A0D7","#FFFFFF"],
+  ["psg","Paris Saint-Germain","PSG","#004170","#DA291C"],
+  ["porto","Porto","FCP","#00428C","#FFFFFF"],
+  ["psv","PSV","PSV","#ED1C24","#FFFFFF"],
+  ["betis","Real Betis","BET","#00954C","#FFFFFF"],
+  ["real-madrid","Real Madrid","RMA","#F4F4F4","#FEBE10"],
+  ["roma","Roma","ROM","#8E1F2F","#F0BC42"],
+  ["sabah","Sabah","SAB","#1F3C88","#FFFFFF"],
+  ["shakhtar","Shakhtar Donetsk","SHA","#F58220","#141414"],
+  ["slavia","Slavia Praha","SLA","#E30613","#FFFFFF"],
+  ["slovan","Slovan Bratislava","SLO","#6CB4E4","#FFFFFF"],
+  ["sporting","Sporting CP","SCP","#008057","#FFFFFF"],
+  ["stuttgart","Stuttgart","VFB","#E32219","#FFFFFF"],
+  ["viking","Viking","VIK","#1D3F8A","#FFFFFF"],
+  ["villarreal","Villarreal","VIL","#FFE667","#005187"]
+].map(([id,name,short,c1,c2])=>({id,name,short,c1,c2,logo:null}));
+const T = Object.fromEntries(TEAMS.map(t=>[t.id,t]));
+
+const COLS=9, ROWS=4, R=100, W=Math.sqrt(3)*R, PAD=14;
+const HEX=[];
+for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) HEX.push({x:PAD+W/2+c*W+(r%2)*W/2, y:PAD+R+r*1.5*R});
+HEX.forEach((h,i)=>h.nb=HEX.map((o,j)=>j).filter(j=>j!==i&&Math.hypot(HEX[j].x-h.x,HEX[j].y-h.y)<W*1.05));
+const MAPW=PAD*2+W*(COLS+.5), MAPH=PAD*2+R*(2+1.5*(ROWS-1));
+const FULL=[0,0,MAPW,MAPH];
+const SPIN_MS=5000;
+const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function lum(hex){const n=parseInt(hex.slice(1),16);const c=[n>>16,(n>>8)&255,n&255].map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*c[0]+.7152*c[1]+.0722*c[2]}
+const textOn=h=>lum(h)>.45?"#0B1030":"#FFFFFF";
+const shade=(hex,f)=>{const n=parseInt(hex.slice(1),16);const ch=[n>>16,(n>>8)&255,n&255].map(v=>Math.round(f<0?v*(1+f):v+(255-v)*f));return "#"+ch.map(v=>v.toString(16).padStart(2,"0")).join("")};
+const ease=t=>1-Math.pow(1-t,3); // fast start, slow finish
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------- state ---------- */
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function fresh(){return {owner:shuffle(TEAMS.map(t=>t.id)),phase:"wheel",att:null,def:null,defHex:null,angle:0,log:[]}}
+const KEY="football-imperialism-ucl-v1";
+let S; try{S=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){}
+if(!S||!Array.isArray(S.owner)||S.owner.length!==HEX.length||!S.owner.every(o=>T[o])) S=fresh();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+let busy=false, confirmNew=false, arrowRot=S.angle||0, view=FULL.slice();
+
+const alive=()=>TEAMS.filter(t=>S.owner.includes(t.id));
+const hexesOf=id=>S.owner.map((o,i)=>o===id?i:-1).filter(i=>i>=0);
+function anchorHex(id){ // the team's hex closest to the middle of its land: the arrow spins around this logo
+  const hs=hexesOf(id); const cx=hs.reduce((a,i)=>a+HEX[i].x,0)/hs.length, cy=hs.reduce((a,i)=>a+HEX[i].y,0)/hs.length;
+  return hs.reduce((b,i)=>Math.hypot(HEX[i].x-cx,HEX[i].y-cy)<Math.hypot(HEX[b].x-cx,HEX[b].y-cy)?i:b,hs[0]);
+}
+const bearing=(a,b)=>(Math.atan2(HEX[b].x-HEX[a].x,-(HEX[b].y-HEX[a].y))*180/Math.PI+360)%360;
+const angDiff=(a,b)=>{const d=Math.abs(a-b)%360;return d>180?360-d:d};
+function defenderFor(id,angle){
+  const from=anchorHex(id); let best=null,bd=999;
+  for(const i of hexesOf(id)) for(const j of HEX[i].nb){
+    if(S.owner[j]===id) continue;
+    const d=angDiff(angle%360,bearing(from,j)); if(d<bd){bd=d;best=j}
+  }
+  return best;
+}
+
+/* ---------- logos ---------- */
+function loadLogos(){
+  TEAMS.forEach(t=>{
+    const tryExt=exts=>{ if(!exts.length) return; const img=new Image();
+      img.onload=()=>{t.logo=img.src;t.img=img;renderMap();renderSide()}; img.onerror=()=>tryExt(exts.slice(1));
+      img.src=`logos/${t.id}.${exts[0]}`;};
+    tryExt(["png","svg","webp"]);
+  });
+}
+function crestSVG(t){ // placeholder badge, or the real logo when one is in /logos
+  if(t.logo) return `<svg class="crest" viewBox="0 0 100 100"><image href="${t.logo}" x="0" y="0" width="100" height="100" preserveAspectRatio="xMidYMid meet"/></svg>`;
+  const fs=t.short.length>3?22:t.short.length>2?28:36;
+  return `<svg class="crest" viewBox="0 0 100 100"><path d="M50 4 L90 16 L86 58 Q80 82 50 96 Q20 82 14 58 L10 16 Z" fill="${t.c1}" stroke="${t.c2}" stroke-width="6" stroke-linejoin="round"/>
+    <text x="50" y="52" text-anchor="middle" dominant-baseline="central" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="800" font-size="${fs}" fill="${textOn(t.c1)}">${esc(t.short)}</text></svg>`;
+}
+
+/* ---------- map ---------- */
+const svg=document.getElementById("map"), NS="http://www.w3.org/2000/svg";
+function el(tag,a,p){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
+const hexPts=(x,y,r)=>[0,1,2,3,4,5].map(k=>{const a=Math.PI/180*(60*k-30);return `${(x+r*Math.cos(a)).toFixed(1)},${(y+r*Math.sin(a)).toFixed(1)}`}).join(" ");
+const defs=el("defs",{},svg);
+const gHex=el("g",{},svg), gFx=el("g",{},svg);
+// arrow: ring around the logo plus a long pointer, pointing up at rest
+const gArrow=el("g",{visibility:"hidden"},gFx);
+el("circle",{r:R*.62,fill:"none",stroke:"#F5C542","stroke-width":6,"stroke-dasharray":"14 9"},gArrow);
+const needle=el("g",{},gArrow);
+el("path",{d:`M0,${-R*1.75} L${R*.3},${-R*1.18} L${R*.11},${-R*1.18} L${R*.11},${-R*.68} L${-R*.11},${-R*.68} L${-R*.11},${-R*1.18} L${-R*.3},${-R*1.18} Z`,fill:"#F5C542",stroke:"#070B24","stroke-width":5,"stroke-linejoin":"round"},needle);
+const target=el("polygon",{fill:"none",stroke:"#FF4B5C","stroke-width":9,visibility:"hidden","stroke-linejoin":"round"},gFx);
+
+function renderMap(){
+  svg.setAttribute("viewBox",view.join(" "));
+  gHex.textContent=""; defs.textContent="";
+  const focus=new Set([S.att,S.def].filter(Boolean));
+  TEAMS.forEach(t=>{
+    const g=el("radialGradient",{id:"g-"+t.id,cx:"50%",cy:"40%",r:"65%"},defs);
+    el("stop",{offset:"0%","stop-color":shade(t.c1,.18)},g); el("stop",{offset:"100%","stop-color":shade(t.c1,-.35)},g);
+  });
+  HEX.forEach((h,i)=>{
+    const t=T[S.owner[i]];
+    const g=el("g",{"data-i":i},gHex);
+    el("polygon",{points:hexPts(h.x,h.y,R),fill:`url(#g-${t.id})`,class:"hex"+(focus.size&&!focus.has(t.id)?" dim":""),"data-hex":i},g);
+    const s=R*1.02;
+    const holder=el("g",{transform:`translate(${h.x-s/2},${h.y-s/2}) scale(${s/100})`,opacity:focus.size&&!focus.has(t.id)?.35:1},g);
+    holder.innerHTML=crestSVG(t).replace(/^<svg[^>]*>|<\/svg>$/g,"");
+  });
+  // arrow
+  if(S.att&&(S.phase==="arrow"||S.phase==="match")){
+    const a=HEX[anchorHex(S.att)];
+    gArrow.setAttribute("visibility","visible"); gArrow.setAttribute("transform",`translate(${a.x},${a.y})`);
+    needle.setAttribute("transform",`rotate(${arrowRot})`);
+  } else gArrow.setAttribute("visibility","hidden");
+  if(S.phase==="match"&&S.defHex!=null){const h=HEX[S.defHex];target.setAttribute("points",hexPts(h.x,h.y,R-6));target.setAttribute("visibility","visible")}
+  else target.setAttribute("visibility","hidden");
+}
+function animate(ms,step){return new Promise(res=>{if(reduced)ms=Math.min(ms,300);const t0=performance.now();(function f(now){const t=Math.min(1,(now-t0)/ms);step(t);if(t<1)requestAnimationFrame(f);else res()})(t0)})}
+function focusBox(id){
+  const hs=hexesOf(id); let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  hs.forEach(i=>{x0=Math.min(x0,HEX[i].x);x1=Math.max(x1,HEX[i].x);y0=Math.min(y0,HEX[i].y);y1=Math.max(y1,HEX[i].y)});
+  const m=W*1.25; x0-=m;x1+=m;y0-=m;y1+=m;
+  let w=x1-x0,h=y1-y0; const ar=MAPW/MAPH;
+  if(w/h<ar){const nw=h*ar;x0-=(nw-w)/2;w=nw}else{const nh=w/ar;y0-=(nh-h)/2;h=nh}
+  if(w>=MAPW) return FULL.slice();
+  return [x0,y0,w,h];
+}
+async function zoomTo(box){
+  const from=view.slice();
+  await animate(1100,t=>{const e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;view=from.map((v,k)=>v+(box[k]-v)*e);svg.setAttribute("viewBox",view.join(" "))});
+  view=box.slice();
+}
+
+/* ---------- wheel ---------- */
+let wheelRot=0;
+function drawWheel(cv,highlight){
+  const dpr=window.devicePixelRatio||1,size=cv.clientWidth;
+  cv.width=size*dpr;cv.height=size*dpr;const g=cv.getContext("2d");g.scale(dpr,dpr);
+  const r=size/2,list=alive(),n=list.length,seg=2*Math.PI/n;
+  g.translate(r,r);g.rotate(wheelRot);
+  list.forEach((t,i)=>{
+    const a0=-Math.PI/2+i*seg;
+    g.beginPath();g.moveTo(0,0);g.arc(0,0,r-6,a0,a0+seg);g.closePath();
+    g.fillStyle=t.c1;g.fill();g.lineWidth=highlight===t.id?6:1.5;g.strokeStyle=highlight===t.id?"#F5C542":"rgba(7,11,36,.8)";g.stroke();
+    g.save();g.rotate(a0+seg/2);
+    const logoSize=Math.min(r*seg*.8,r*.16);
+    if(t.img){g.save();g.translate(r-logoSize/2-16,0);g.rotate(Math.PI/2);g.drawImage(t.img,-logoSize/2,-logoSize/2,logoSize,logoSize);g.restore()}
+    g.textAlign="right";g.textBaseline="middle";g.fillStyle=textOn(t.c1);
+    g.font=`800 ${Math.max(12,Math.min(26,r*seg*.5))}px "Barlow Condensed","Arial Narrow",sans-serif`;
+    g.fillText(t.short,r-(t.img?logoSize+26:18),0);g.restore();
+  });
+  g.beginPath();g.arc(0,0,r*.1,0,2*Math.PI);g.fillStyle="#070B24";g.fill();g.lineWidth=4;g.strokeStyle="#F5C542";g.stroke();
+  g.beginPath();g.arc(0,0,r-3,0,2*Math.PI);g.lineWidth=6;g.strokeStyle="#C8CFE6";g.stroke();
+}
+function atPointer(){const list=alive(),seg=2*Math.PI/list.length;const a=((-wheelRot)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);return list[Math.floor(a/seg)%list.length]}
+
+const pop=document.getElementById("popup");
+function closePop(){pop.innerHTML=""}
+function openWheel(){
+  if(busy||S.phase!=="wheel") return;
+  pop.innerHTML=`<div class="overlay"><div class="pop"><h3>Who attacks?</h3>
+    <div class="wheelbox"><canvas id="wheel" aria-label="Wheel of teams that still hold land"></canvas><div class="pointer"></div></div>
+    <div class="row"><button class="primary" id="pSpin">Spin</button><button id="pClose">Close</button></div></div></div>`;
+  const cv=document.getElementById("wheel"); drawWheel(cv);
+  document.getElementById("pClose").onclick=()=>{if(!busy)closePop()};
+  document.getElementById("pSpin").onclick=cv.onclick=()=>spin(cv);
+}
+async function spin(cv){
+  if(busy) return; busy=true; renderSide();
+  document.getElementById("pSpin").disabled=true;document.getElementById("pClose").disabled=true;
+  const n=alive().length,seg=2*Math.PI/n,pick=Math.floor(Math.random()*n);
+  const start=wheelRot; let end=-(pick*seg+seg*(.15+Math.random()*.7));
+  while(end>start-2*Math.PI*7) end-=2*Math.PI;
+  await animate(SPIN_MS,t=>{wheelRot=start+(end-start)*ease(t);drawWheel(cv)});
+  wheelRot=((end%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
+  const t=atPointer(); drawWheel(cv,t.id);
+  await new Promise(r=>setTimeout(r,700));
+  S.att=t.id;S.def=null;S.defHex=null;S.angle=0;arrowRot=0;S.phase="arrow";save();busy=false;
+  pop.innerHTML=`<div class="overlay"><div class="pop"><h3>The attacker is</h3>
+    <div class="winner">${crestSVG(t)}<div class="name">${esc(t.name)}</div></div>
+    <button class="primary" id="pGo">Go to the map</button></div></div>`;
+  document.getElementById("pGo").onclick=async()=>{closePop();renderAll();busy=true;renderSide();await zoomTo(focusBox(S.att));busy=false;renderSide()};
+  renderSide();
+}
+
+/* ---------- arrow ---------- */
+async function spinArrow(){
+  if(busy||S.phase!=="arrow") return; busy=true; renderSide();
+  const start=arrowRot%360, final=Math.random()*360;
+  const end=start+360*(5+Math.floor(Math.random()*3))+((final-start)%360+360)%360;
+  await animate(SPIN_MS,t=>{arrowRot=start+(end-start)*ease(t);needle.setAttribute("transform",`rotate(${arrowRot})`)});
+  arrowRot=final;
+  S.angle=Math.round(final);S.defHex=defenderFor(S.att,final);S.def=S.owner[S.defHex];S.phase="match";save();
+  busy=false; renderAll();
+}
+
+/* ---------- match ---------- */
+function openMatch(){
+  if(busy||S.phase!=="match") return;
+  const a=T[S.att],d=T[S.def];
+  pop.innerHTML=`<div class="overlay"><div class="pop">
+    <div class="fixture">
+      <div class="side-t">${crestSVG(d)}<div class="nm">${esc(d.name)}</div><div class="role">Defends</div></div>
+      <div class="dash">-</div>
+      <div class="side-t">${crestSVG(a)}<div class="nm">${esc(a.name)}</div><div class="role">Attacks</div></div>
+    </div>
+    <div class="hint">Play it in FC27, then pick the winner. The winner takes all of the loser's land.</div>
+    <div class="row"><button class="primary" id="wD">${esc(d.name)} won</button><button class="primary" id="wA">${esc(a.name)} won</button></div>
+    <button id="pClose">Close</button></div></div>`;
+  document.getElementById("wD").onclick=()=>result(d.id);
+  document.getElementById("wA").onclick=()=>result(a.id);
+  document.getElementById("pClose").onclick=closePop;
+}
+async function result(win){
+  closePop(); busy=true; renderSide();
+  const lose=win===S.att?S.def:S.att, lost=hexesOf(lose);
+  lost.forEach(i=>svg.querySelector(`[data-hex="${i}"]`).classList.add("flash"));
+  await new Promise(r=>setTimeout(r,reduced?100:1800));
+  const prev=S.owner.slice();
+  S.owner=S.owner.map(o=>o===lose?win:o);
+  S.log.push({att:S.att,def:S.def,win,lose,taken:lost.length,prev});
+  S.att=S.def=S.defHex=null;S.phase=alive().length<=1?"over":"wheel";save();
+  renderAll(); await zoomTo(FULL); busy=false; renderAll();
+  if(S.phase==="over"){const c=alive()[0];pop.innerHTML=`<div class="overlay"><div class="pop"><h3>Champion of Europe</h3><div class="winner">${crestSVG(c)}<div class="name">${esc(c.name)}</div></div><div class="hint">Holds all 36 blocks after ${S.log.length} matches.</div><button class="primary" id="pOk">Close</button></div></div>`;document.getElementById("pOk").onclick=closePop}
+}
+
+/* ---------- side panel ---------- */
+function renderSide(){
+  const ph=S.phase;
+  const set=(id,ready)=>{const b=document.getElementById(id);b.disabled=busy||!ready;b.classList.toggle("ready",!busy&&ready)};
+  set("bWheel",ph==="wheel");set("bArrow",ph==="arrow");set("bMatch",ph==="match");
+  document.getElementById("bCancel").disabled=busy||!(ph==="arrow"||ph==="match");
+  document.getElementById("bUndo").disabled=busy||!S.log.length;
+  document.getElementById("bNew").disabled=busy;
+  document.getElementById("mAlive").textContent=alive().length;
+  document.getElementById("mPlayed").textContent=S.log.length;
+  const now=document.getElementById("now");
+  if(ph==="over"){const c=alive()[0];now.innerHTML=`${crestSVG(c)}<div><b>${esc(c.name)}</b>won the whole map.</div>`}
+  else if(S.att){const a=T[S.att];now.innerHTML=`${crestSVG(a)}<div><b>${esc(a.name)}</b>${ph==="arrow"?"is attacking. Spin the arrow for the direction.":`attacks ${esc(T[S.def].name)}.`}</div>`}
+  else now.innerHTML=`<div>Spin the wheel to pick the next attacker. Only teams that still hold land are on it.</div>`;
+  const log=document.getElementById("log");
+  log.innerHTML=S.log.length?S.log.slice(-8).reverse().map(e=>`<li><b>${esc(T[e.win].name)}</b> beat <b>${esc(T[e.lose].name)}</b> and took ${e.taken} block${e.taken===1?"":"s"}.</li>`).join(""):`<li class="empty">No matches yet.</li>`;
+  const cf=document.getElementById("confirm");
+  if(confirmNew){
+    cf.innerHTML=`<div class="confirm">Start a new game? Teams get new random blocks and the results are cleared.<div class="row"><button class="small danger" id="cYes">Start new game</button><button class="small" id="cNo">Keep playing</button></div></div>`;
+    document.getElementById("cYes").onclick=()=>{confirmNew=false;S=fresh();save();view=FULL.slice();renderAll()};
+    document.getElementById("cNo").onclick=()=>{confirmNew=false;renderSide()};
+  } else cf.innerHTML="";
+}
+function renderAll(){renderMap();renderSide()}
+document.getElementById("bWheel").onclick=openWheel;
+document.getElementById("bArrow").onclick=spinArrow;
+document.getElementById("bMatch").onclick=openMatch;
+document.getElementById("bCancel").onclick=async()=>{S.att=S.def=S.defHex=null;S.phase="wheel";save();renderAll();busy=true;await zoomTo(FULL);busy=false;renderSide()};
+document.getElementById("bUndo").onclick=async()=>{const e=S.log.pop();if(!e)return;S.owner=e.prev;S.att=S.def=S.defHex=null;S.phase="wheel";save();renderAll();busy=true;await zoomTo(FULL);busy=false;renderSide()};
+document.getElementById("bNew").onclick=()=>{confirmNew=true;renderSide()};
+
+if(S.att&&(S.phase==="arrow"||S.phase==="match")) view=focusBox(S.att);
+renderAll(); loadLogos();
+document.fonts&&document.fonts.ready.then(renderAll);
+</script>
+</body>
+</html>
