@@ -25,6 +25,7 @@ body{background:radial-gradient(1200px 700px at 40% 45%,#15206A 0%,var(--deep) 4
 #map{width:100%;height:100%;display:block}
 .hex{stroke-width:1.5;stroke-linejoin:round;transition:filter .4s,opacity .4s}
 .hex.dim{opacity:.35}
+.logo{filter:drop-shadow(0 0 1.5px rgba(255,255,255,.85)) drop-shadow(0 2px 6px rgba(0,0,0,.55))}
 .hex.flash{animation:flash .45s ease-in-out 4}
 @keyframes flash{50%{filter:brightness(2.2)}}
 .tag{font-family:var(--display);font-weight:800;text-anchor:middle;dominant-baseline:central;pointer-events:none}
@@ -100,7 +101,8 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
 <div id="popup"></div>
 
 <script>
-/* 2026/27 Champions League league phase (UEFA list). Put a logo at logos/<id>.png (or .svg) to replace the badge. */
+/* 2026/27 Champions League league phase (UEFA list). Land colours are tones of each logo's main colour,
+   tuned so every pair of teams is clearly different.  Put a logo at logos/<id>.png (or .svg) to replace the badge. */
 /* ---------- languages (team names stay as they are) ---------- */
 const FLAGS={
   tr:`<svg class="flag" viewBox="0 0 30 20"><rect width="30" height="20" fill="#E30A17"/><circle cx="11" cy="10" r="5" fill="#fff"/><circle cx="12.3" cy="10" r="4" fill="#E30A17"/><polygon points="16.40,7.70 16.96,9.23 18.59,9.29 17.30,10.29 17.75,11.86 16.40,10.95 15.05,11.86 15.50,10.29 14.21,9.29 15.84,9.23" fill="#fff"/></svg>`,
@@ -138,42 +140,42 @@ function applyLang(){
 document.addEventListener("click",()=>{if(langOpen){langOpen=false;applyLang()}});
 
 const TEAMS = [
-  ["aek","AEK Athens","AEK","#F2C200","#141414"],
-  ["arsenal","Arsenal","ARS","#EF0107","#FFFFFF"],
-  ["aston-villa","Aston Villa","AVL","#670E36","#95BFE5"],
-  ["atletico","Atlético de Madrid","ATM","#CB3524","#272E61"],
-  ["barcelona","Barcelona","BAR","#A50044","#004D98"],
-  ["bayern","Bayern München","FCB","#DC052D","#FFFFFF"],
-  ["bodo-glimt","Bodø/Glimt","BOD","#FFD700","#141414"],
-  ["dortmund","Borussia Dortmund","BVB","#FDE100","#141414"],
-  ["club-brugge","Club Brugge","CLB","#0A6ABF","#141414"],
-  ["como","Como","COM","#1B3F8F","#FFFFFF"],
-  ["fenerbahce","Fenerbahçe","FB","#12275E","#FFE000"],
-  ["feyenoord","Feyenoord","FEY","#E00000","#FFFFFF"],
-  ["galatasaray","Galatasaray","GS","#A6192E","#F4B223"],
-  ["inter","Inter","INT","#0068A8","#141414"],
-  ["lask","LASK","LASK","#1A1A1A","#FFFFFF"],
-  ["leipzig","RB Leipzig","RBL","#DD0741","#FFFFFF"],
-  ["lens","Lens","RCL","#FFE500","#E30613"],
-  ["lille","Lille","LOSC","#E01E13","#1B2A55"],
-  ["liverpool","Liverpool","LIV","#F3EEE4","#C8102E"],
-  ["man-city","Manchester City","MCI","#6CABDD","#FFFFFF"],
-  ["man-united","Manchester United","MUN","#DA291C","#FBE122"],
-  ["napoli","Napoli","NAP","#12A0D7","#FFFFFF"],
-  ["psg","Paris Saint-Germain","PSG","#004170","#DA291C"],
-  ["porto","Porto","FCP","#00428C","#FFFFFF"],
-  ["psv","PSV","PSV","#ED1C24","#FFFFFF"],
-  ["betis","Real Betis","BET","#00954C","#FFFFFF"],
-  ["real-madrid","Real Madrid","RMA","#F4F4F4","#FEBE10"],
-  ["roma","Roma","ROM","#8E1F2F","#F0BC42"],
-  ["sabah","Sabah","SAB","#E056A0","#141414"],
-  ["shakhtar","Shakhtar Donetsk","SHA","#F58220","#141414"],
-  ["slavia","Slavia Praha","SLA","#F3F3F3","#E30613"],
-  ["slovan","Slovan Bratislava","SLO","#6CB4E4","#FFFFFF"],
-  ["sporting","Sporting CP","SCP","#F1F5F2","#008057"],
-  ["stuttgart","Stuttgart","VFB","#E32219","#FFFFFF"],
-  ["viking","Viking","VIK","#6E1420","#E4C06A"],
-  ["villarreal","Villarreal","VIL","#FFE667","#005187"]
+  ["aek","AEK Athens","AEK","#D6BE3E","#141414"],
+  ["arsenal","Arsenal","ARS","#FA2300","#FFFFFF"],
+  ["aston-villa","Aston Villa","AVL","#974881","#95BFE5"],
+  ["atletico","Atlético de Madrid","ATM","#AD4F43","#272E61"],
+  ["barcelona","Barcelona","BAR","#970058","#004D98"],
+  ["bayern","Bayern München","FCB","#EE336F","#FFFFFF"],
+  ["bodo-glimt","Bodø/Glimt","BOD","#F9F847","#141414"],
+  ["dortmund","Borussia Dortmund","BVB","#FFD321","#141414"],
+  ["club-brugge","Club Brugge","CLB","#518CF8","#141414"],
+  ["como","Como","COM","#2E2C85","#FFFFFF"],
+  ["fenerbahce","Fenerbahçe","FB","#16236A","#FFE000"],
+  ["feyenoord","Feyenoord","FEY","#FF7E16","#FFFFFF"],
+  ["galatasaray","Galatasaray","GS","#FFAB5C","#F4B223"],
+  ["inter","Inter","INT","#055A8C","#141414"],
+  ["lask","LASK","LASK","#1C1C1C","#FFFFFF"],
+  ["leipzig","RB Leipzig","RBL","#FF99BF","#FFFFFF"],
+  ["lens","Lens","RCL","#FFF0A3","#E30613"],
+  ["lille","Lille","LOSC","#CB1551","#1B2A55"],
+  ["liverpool","Liverpool","LIV","#FE797C","#C8102E"],
+  ["man-city","Manchester City","MCI","#86BBDA","#FFFFFF"],
+  ["man-united","Manchester United","MUN","#A80520","#FBE122"],
+  ["napoli","Napoli","NAP","#15A9D2","#FFFFFF"],
+  ["psg","Paris Saint-Germain","PSG","#083153","#DA291C"],
+  ["porto","Porto","FCP","#4E6BC5","#FFFFFF"],
+  ["psv","PSV","PSV","#D89B91","#FFFFFF"],
+  ["betis","Real Betis","BET","#4ABA61","#FFFFFF"],
+  ["real-madrid","Real Madrid","RMA","#C7C7C7","#FEBE10"],
+  ["roma","Roma","ROM","#6E1600","#F0BC42"],
+  ["sabah","Sabah","SAB","#D04CA1","#141414"],
+  ["shakhtar","Shakhtar Donetsk","SHA","#CF7717","#141414"],
+  ["slavia","Slavia Praha","SLA","#FFE9E3","#E30613"],
+  ["slovan","Slovan Bratislava","SLO","#BFE6FA","#FFFFFF"],
+  ["sporting","Sporting CP","SCP","#00503B","#008057"],
+  ["stuttgart","Stuttgart","VFB","#D7615F","#FFFFFF"],
+  ["viking","Viking","VIK","#743444","#E4C06A"],
+  ["villarreal","Villarreal","VIL","#E8D094","#005187"]
 ].map(([id,name,short,c1,c2])=>({id,name,short,c1,c2,logo:null}));
 const T = Object.fromEntries(TEAMS.map(t=>[t.id,t]));
 
@@ -287,7 +289,7 @@ function renderMap(){
   const focus=new Set([S.att,S.def].filter(Boolean));
   TEAMS.forEach(t=>{
     const g=el("radialGradient",{id:"g-"+t.id,cx:"50%",cy:"40%",r:"65%"},defs);
-    el("stop",{offset:"0%","stop-color":shade(t.c1,.18)},g); el("stop",{offset:"100%","stop-color":shade(t.c1,-.35)},g);
+    el("stop",{offset:"0%","stop-color":shade(t.c1,.12)},g); el("stop",{offset:"100%","stop-color":shade(t.c1,-.2)},g);
   });
   HEX.forEach((h,i)=>{
     const t=T[S.owner[i]];
@@ -306,7 +308,7 @@ function renderMap(){
   el("path",{d:edges.join(""),fill:"none",stroke:"#070B24","stroke-width":8,"stroke-linecap":"round","pointer-events":"none"},gHex);
   const LO=logoLayout();
   for(const id in LO){ const {x,y,s}=LO[id];
-    const holder=el("g",{transform:`translate(${x-s/2},${y-s/2}) scale(${s/100})`,opacity:focus.size&&!focus.has(id)?.35:1,"pointer-events":"none"},gHex);
+    const holder=el("g",{transform:`translate(${x-s/2},${y-s/2}) scale(${s/100})`,opacity:focus.size&&!focus.has(id)?.35:1,"pointer-events":"none",class:"logo"},gHex);
     holder.innerHTML=crestSVG(T[id]).replace(/^<svg[^>]*>|<\/svg>$/g,"");
   }
   // arrow
