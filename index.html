@@ -23,7 +23,7 @@ body{background:radial-gradient(1200px 700px at 40% 45%,#15206A 0%,var(--deep) 4
 .bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;padding:10px 16px 14px}
 .bar .sep{width:1px;height:24px;background:var(--edge);margin:0 6px}
 #map{width:100%;height:100%;display:block}
-.hex{stroke:var(--night);stroke-width:7;stroke-linejoin:round;transition:filter .4s,opacity .4s}
+.hex{stroke-width:1.5;stroke-linejoin:round;transition:filter .4s,opacity .4s}
 .hex.dim{opacity:.35}
 .hex.flash{animation:flash .45s ease-in-out 4}
 @keyframes flash{50%{filter:brightness(2.2)}}
@@ -204,14 +204,39 @@ let busy=false, confirmNew=false, arrowRot=S.angle||0, view=FULL.slice();
 
 const alive=()=>TEAMS.filter(t=>S.owner.includes(t.id));
 const hexesOf=id=>S.owner.map((o,i)=>o===id?i:-1).filter(i=>i>=0);
-function anchorHex(id){ // the team's hex closest to the middle of its land: the arrow spins around this logo
-  const hs=hexesOf(id); const cx=hs.reduce((a,i)=>a+HEX[i].x,0)/hs.length, cy=hs.reduce((a,i)=>a+HEX[i].y,0)/hs.length;
-  return hs.reduce((b,i)=>Math.hypot(HEX[i].x-cx,HEX[i].y-cy)<Math.hypot(HEX[b].x-cx,HEX[b].y-cy)?i:b,hs[0]);
+/* one logo per team: odd land count -> the middle block, even -> the edge between the two middle blocks.
+   Logos grow with the land, then shrink where needed so two logos never overlap. */
+const BASE_LOGO=R*1.02;
+function logoSpot(id){
+  const hs=hexesOf(id), n=hs.length;
+  const cx=hs.reduce((a,i)=>a+HEX[i].x,0)/n, cy=hs.reduce((a,i)=>a+HEX[i].y,0)/n;
+  const d=(x,y)=>Math.hypot(x-cx,y-cy);
+  if(n%2===0){
+    let best=null,bd=1e9;
+    for(const i of hs) for(const j of HEX[i].nb){ if(j<i||S.owner[j]!==id) continue;
+      const mx=(HEX[i].x+HEX[j].x)/2, my=(HEX[i].y+HEX[j].y)/2, dd=d(mx,my); if(dd<bd){bd=dd;best={x:mx,y:my}} }
+    if(best) return best;
+  }
+  const i=hs.reduce((b,k)=>d(HEX[k].x,HEX[k].y)<d(HEX[b].x,HEX[b].y)?k:b,hs[0]);
+  return {x:HEX[i].x,y:HEX[i].y};
 }
-const bearing=(a,b)=>(Math.atan2(HEX[b].x-HEX[a].x,-(HEX[b].y-HEX[a].y))*180/Math.PI+360)%360;
+function logoLayout(){
+  const L0={};
+  alive().forEach(t=>{const n=hexesOf(t.id).length, p=logoSpot(t.id); L0[t.id]={x:p.x,y:p.y,s:Math.min(R*1.9,BASE_LOGO*(1+.22*Math.log2(n)))}});
+  const ids=Object.keys(L0), GAP=8;
+  for(let pass=0;pass<6;pass++){ let moved=false;
+    for(let a=0;a<ids.length;a++) for(let b=a+1;b<ids.length;b++){
+      const A=L0[ids[a]],B=L0[ids[b]], dist=Math.hypot(A.x-B.x,A.y-B.y), need=(A.s+B.s)*.46+GAP;
+      if(dist<need){const k=Math.max(.3,(dist-GAP)/((A.s+B.s)*.46));A.s*=k;B.s*=k;moved=true}
+    }
+    if(!moved) break;
+  }
+  return L0;
+}
+const bearing=(p,b)=>(Math.atan2(HEX[b].x-p.x,-(HEX[b].y-p.y))*180/Math.PI+360)%360;
 const angDiff=(a,b)=>{const d=Math.abs(a-b)%360;return d>180?360-d:d};
 function defenderFor(id,angle){
-  const from=anchorHex(id); let best=null,bd=999;
+  const from=logoSpot(id); let best=null,bd=999;
   for(const i of hexesOf(id)) for(const j of HEX[i].nb){
     if(S.owner[j]===id) continue;
     const d=angDiff(angle%360,bearing(from,j)); if(d<bd){bd=d;best=j}
@@ -259,15 +284,27 @@ function renderMap(){
   HEX.forEach((h,i)=>{
     const t=T[S.owner[i]];
     const g=el("g",{"data-i":i},gHex);
-    el("polygon",{points:hexPts(h.x,h.y,R),fill:`url(#g-${t.id})`,class:"hex"+(focus.size&&!focus.has(t.id)?" dim":""),"data-hex":i},g);
-    const s=R*1.02;
-    const holder=el("g",{transform:`translate(${h.x-s/2},${h.y-s/2}) scale(${s/100})`,opacity:focus.size&&!focus.has(t.id)?.35:1},g);
-    holder.innerHTML=crestSVG(t).replace(/^<svg[^>]*>|<\/svg>$/g,"");
+    el("polygon",{points:hexPts(h.x,h.y,R),fill:`url(#g-${t.id})`,stroke:shade(t.c1,-.3),class:"hex"+(focus.size&&!focus.has(t.id)?" dim":""),"data-hex":i},g);
   });
+  // borders: thin inside a team's land, thick where two teams (or the map edge) meet
+  const edges=[];
+  HEX.forEach((h,i)=>{ for(let k=0;k<6;k++){
+    const a=Math.PI/180*60*k, nx=h.x+W*Math.cos(a), ny=h.y+W*Math.sin(a);
+    const j=HEX.findIndex(o=>Math.hypot(o.x-nx,o.y-ny)<5);
+    if(j!==-1&&(j<i||S.owner[j]===S.owner[i])) continue;
+    const v1=Math.PI/180*(60*k-30), v2=Math.PI/180*(60*k+30);
+    edges.push(`M${(h.x+R*Math.cos(v1)).toFixed(1)},${(h.y+R*Math.sin(v1)).toFixed(1)}L${(h.x+R*Math.cos(v2)).toFixed(1)},${(h.y+R*Math.sin(v2)).toFixed(1)}`);
+  }});
+  el("path",{d:edges.join(""),fill:"none",stroke:"#070B24","stroke-width":8,"stroke-linecap":"round","pointer-events":"none"},gHex);
+  const LO=logoLayout();
+  for(const id in LO){ const {x,y,s}=LO[id];
+    const holder=el("g",{transform:`translate(${x-s/2},${y-s/2}) scale(${s/100})`,opacity:focus.size&&!focus.has(id)?.35:1,"pointer-events":"none"},gHex);
+    holder.innerHTML=crestSVG(T[id]).replace(/^<svg[^>]*>|<\/svg>$/g,"");
+  }
   // arrow
   if(S.att&&(S.phase==="arrow"||S.phase==="match")){
-    const a=HEX[anchorHex(S.att)];
-    gArrow.setAttribute("visibility","visible"); gArrow.setAttribute("transform",`translate(${a.x},${a.y})`);
+    const a=logoSpot(S.att);
+    gArrow.setAttribute("visibility","visible"); gArrow.setAttribute("transform",`translate(${a.x},${a.y}) scale(${(LO[S.att]?.s||BASE_LOGO)/BASE_LOGO})`);
     needle.setAttribute("transform",`rotate(${arrowRot})`);
   } else gArrow.setAttribute("visibility","hidden");
   if(S.phase==="match"&&S.defHex!=null){const h=HEX[S.defHex];target.setAttribute("points",hexPts(h.x,h.y,R-6));target.setAttribute("visibility","visible")}
