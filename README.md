@@ -10,6 +10,6 @@ The game saves in your browser, so you can close the tab between matches.
 
 ## Logos
 
-Put a logo in `logos/` named after the team id, as `.png`, `.svg` or `.webp`. It replaces the placeholder badge automatically.
+All 36 logos are in `logos/`, named after the team id. Replace a file there to change a logo (`.png`, `.svg` or `.webp`).
 
 aek, arsenal, aston-villa, atletico, barcelona, bayern, bodo-glimt, dortmund, club-brugge, como, fenerbahce, feyenoord, galatasaray, inter, lask, leipzig, lens, lille, liverpool, man-city, man-united, napoli, psg, porto, psv, betis, real-madrid, roma, sabah, shakhtar, slavia, slovan, sporting, stuttgart, viking, villarreal
