@@ -207,6 +207,9 @@ const hexesOf=id=>S.owner.map((o,i)=>o===id?i:-1).filter(i=>i>=0);
 /* one logo per team: odd land count -> the middle block, even -> the edge between the two middle blocks.
    Logos grow with the land, then shrink where needed so two logos never overlap. */
 const BASE_LOGO=R*1.02;
+const OUTSIDE=[]; // lattice spots just off the map, so logos also stay inside the map edge
+for(let r=-1;r<=ROWS;r++) for(let c=-1;c<=COLS;c++){ if(r>=0&&r<ROWS&&c>=0&&c<COLS) continue;
+  OUTSIDE.push({x:PAD+W/2+c*W+(((r%2)+2)%2)*W/2, y:PAD+R+r*1.5*R}); }
 function logoSpot(id){
   const hs=hexesOf(id), n=hs.length;
   const cx=hs.reduce((a,i)=>a+HEX[i].x,0)/n, cy=hs.reduce((a,i)=>a+HEX[i].y,0)/n;
@@ -222,7 +225,12 @@ function logoSpot(id){
 }
 function logoLayout(){
   const L0={};
-  alive().forEach(t=>{const n=hexesOf(t.id).length, p=logoSpot(t.id); L0[t.id]={x:p.x,y:p.y,s:Math.min(R*1.9,BASE_LOGO*(1+.22*Math.log2(n)))}});
+  alive().forEach(t=>{const n=hexesOf(t.id).length, p=logoSpot(t.id);
+    // keep the logo inside its own land: it may not reach into another team's block or off the map
+    let room=1e9; HEX.forEach((h,i)=>{if(S.owner[i]!==t.id) room=Math.min(room,Math.hypot(h.x-p.x,h.y-p.y)-W/2)});
+    OUTSIDE.forEach(h=>room=Math.min(room,Math.hypot(h.x-p.x,h.y-p.y)-W/2));
+    const want=Math.min(R*1.9,BASE_LOGO*(1+.22*Math.log2(n)));
+    L0[t.id]={x:p.x,y:p.y,s:Math.max(BASE_LOGO,Math.min(want,room/.5))}});
   const ids=Object.keys(L0), GAP=8;
   for(let pass=0;pass<6;pass++){ let moved=false;
     for(let a=0;a<ids.length;a++) for(let b=a+1;b<ids.length;b++){
