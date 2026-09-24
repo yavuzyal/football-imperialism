@@ -179,7 +179,7 @@ const TEAMS = [
 ].map(([id,name,short,c1,c2])=>({id,name,short,c1,c2,logo:null}));
 const T = Object.fromEntries(TEAMS.map(t=>[t.id,t]));
 
-const COLS=9, ROWS=4, R=100, W=Math.sqrt(3)*R, PAD=8;
+const COLS=9, ROWS=4, R=100, W=Math.sqrt(3)*R, PAD=40;
 const HEX=[];
 for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) HEX.push({x:PAD+W/2+c*W+(r%2)*W/2, y:PAD+R+r*1.5*R});
 HEX.forEach((h,i)=>h.nb=HEX.map((o,j)=>j).filter(j=>j!==i&&Math.hypot(HEX[j].x-h.x,HEX[j].y-h.y)<W*1.05));
@@ -197,10 +197,11 @@ const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&qu
 
 /* ---------- state ---------- */
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function fresh(){return {owner:shuffle(TEAMS.map(t=>t.id)),phase:"wheel",att:null,def:null,defHex:null,angle:0,log:[]}}
+function fresh(){return {seed:(Math.random()*2**31)|0,owner:shuffle(TEAMS.map(t=>t.id)),phase:"wheel",att:null,def:null,defHex:null,angle:0,log:[]}}
 const KEY="football-imperialism-ucl-v1";
 let S; try{S=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){}
 if(!S||!Array.isArray(S.owner)||S.owner.length!==HEX.length||!S.owner.every(o=>T[o])) S=fresh();
+if(S.seed==null) S.seed=(Math.random()*2**31)|0;
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 let busy=false, confirmNew=false, arrowRot=S.angle||0, view=FULL.slice();
 
@@ -209,28 +210,25 @@ const hexesOf=id=>S.owner.map((o,i)=>o===id?i:-1).filter(i=>i>=0);
 /* one logo per team: odd land count -> the middle block, even -> the edge between the two middle blocks.
    Logos grow with the land, then shrink where needed so two logos never overlap. */
 const BASE_LOGO=R*1.02;
-const OUTSIDE=[]; // lattice spots just off the map, so logos also stay inside the map edge
-for(let r=-1;r<=ROWS;r++) for(let c=-1;c<=COLS;c++){ if(r>=0&&r<ROWS&&c>=0&&c<COLS) continue;
-  OUTSIDE.push({x:PAD+W/2+c*W+(((r%2)+2)%2)*W/2, y:PAD+R+r*1.5*R}); }
 function logoSpot(id){
-  const hs=hexesOf(id), n=hs.length;
-  const cx=hs.reduce((a,i)=>a+HEX[i].x,0)/n, cy=hs.reduce((a,i)=>a+HEX[i].y,0)/n;
+  const hs=hexesOf(id), n=hs.length, C=shape().cen;
+  const cx=hs.reduce((a,i)=>a+C[i].x,0)/n, cy=hs.reduce((a,i)=>a+C[i].y,0)/n;
   const d=(x,y)=>Math.hypot(x-cx,y-cy);
   if(n%2===0){
     let best=null,bd=1e9;
     for(const i of hs) for(const j of HEX[i].nb){ if(j<i||S.owner[j]!==id) continue;
-      const mx=(HEX[i].x+HEX[j].x)/2, my=(HEX[i].y+HEX[j].y)/2, dd=d(mx,my); if(dd<bd){bd=dd;best={x:mx,y:my}} }
+      const mx=(C[i].x+C[j].x)/2, my=(C[i].y+C[j].y)/2, dd=d(mx,my); if(dd<bd){bd=dd;best={x:mx,y:my}} }
     if(best) return best;
   }
-  const i=hs.reduce((b,k)=>d(HEX[k].x,HEX[k].y)<d(HEX[b].x,HEX[b].y)?k:b,hs[0]);
-  return {x:HEX[i].x,y:HEX[i].y};
+  const i=hs.reduce((b,k)=>d(C[k].x,C[k].y)<d(C[b].x,C[b].y)?k:b,hs[0]);
+  return {x:C[i].x,y:C[i].y};
 }
 function logoLayout(){
   const L0={};
   alive().forEach(t=>{const n=hexesOf(t.id).length, p=logoSpot(t.id);
     // keep the logo inside its own land: it may not reach into another team's block or off the map
-    let room=1e9; HEX.forEach((h,i)=>{if(S.owner[i]!==t.id) room=Math.min(room,Math.hypot(h.x-p.x,h.y-p.y)-W/2)});
-    OUTSIDE.forEach(h=>room=Math.min(room,Math.hypot(h.x-p.x,h.y-p.y)-W/2));
+    let room=1e9; shape().edgeList.forEach(e=>{if(e.j>=0&&S.owner[e.i]===S.owner[e.j]) return;
+      e.pts.forEach(q=>room=Math.min(room,Math.hypot(q.x-p.x,q.y-p.y)-6))});
     const want=Math.min(R*1.9,BASE_LOGO*(1+.22*Math.log2(n)));
     L0[t.id]={x:p.x,y:p.y,s:Math.max(BASE_LOGO,Math.min(want,room/.5))}});
   const ids=Object.keys(L0), GAP=8;
@@ -243,7 +241,7 @@ function logoLayout(){
   }
   return L0;
 }
-const bearing=(p,b)=>(Math.atan2(HEX[b].x-p.x,-(HEX[b].y-p.y))*180/Math.PI+360)%360;
+const bearing=(p,b)=>{const c=shape().cen[b];return (Math.atan2(c.x-p.x,-(c.y-p.y))*180/Math.PI+360)%360};
 const angDiff=(a,b)=>{const d=Math.abs(a-b)%360;return d>180?360-d:d};
 function defenderFor(id,angle){
   const from=logoSpot(id); let best=null,bd=999;
@@ -274,6 +272,48 @@ function crestSVG(t){ // placeholder badge, or the real logo when one is in /log
 const svg=document.getElementById("map"), NS="http://www.w3.org/2000/svg";
 function el(tag,a,p){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
 const hexPts=(x,y,r)=>[0,1,2,3,4,5].map(k=>{const a=Math.PI/180*(60*k-30);return `${(x+r*Math.cos(a)).toFixed(1)},${(y+r*Math.sin(a)).toFixed(1)}`}).join(" ");
+/* organic borders: the lattice corners are jittered and every shared edge becomes a random wavy curve, so no two lands look alike.
+   Then each edge gets a gentle extra bulge, solved so that every block ends up with exactly the same area. */
+function rng(a){return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+let SHAPE=null;
+function buildShapes(seed){
+  const rnd=rng(seed), N=32, verts=new Map(), edges=new Map(), cells=HEX.map(()=>[]);
+  const vk=p=>Math.round(p.x)+","+Math.round(p.y);
+  const vert=p=>{const k=vk(p);if(!verts.has(k)){const an=rnd()*Math.PI*2,r=R*.3*Math.sqrt(rnd());verts.set(k,{k,x:p.x+r*Math.cos(an),y:p.y+r*Math.sin(an)})}return verts.get(k)};
+  const ts=[...Array(N+1).keys()].map(q=>q/N), bump=ts.map(t=>Math.sin(Math.PI*t)**2);
+  HEX.forEach((h,i)=>{ for(let k=0;k<6;k++){
+    const v=[60*k-30,60*k+30].map(d=>vert({x:h.x+R*Math.cos(d*Math.PI/180),y:h.y+R*Math.sin(d*Math.PI/180)}));
+    const key=[v[0].k,v[1].k].sort().join("|");
+    let e=edges.get(key);
+    if(!e){ const [a,b]=v[0].k<v[1].k?v:[v[1],v[0]], L=Math.hypot(b.x-a.x,b.y-a.y);
+      const waves=[[1,16],[2,8],[3,4],[8,1.8],[11,1.4],[14,1.1],[17,.8]].map(([f,amp])=>[f,amp*(.3+.7*rnd())*(rnd()<.5?-1:1),rnd()*Math.PI*2]);
+      const d=ts.map(t=>Math.sin(Math.PI*t)**1.3*waves.reduce((acc,[f,amp,ph])=>acc+amp*Math.sin(Math.PI*f*t+ph),0));
+      e={id:edges.size,cells:[],a,b,L,nx:-(b.y-a.y)/L,ny:(b.x-a.x)/L,d,h:0};
+      edges.set(key,e); }
+    e.cells.push(i);
+    cells[i].push({e,fwd:v[0]===e.a});
+  }});
+  const E=[...edges.values()];
+  const pts=e=>ts.map((t,q)=>{const dd=e.d[q]+e.h*bump[q];return {x:e.a.x+(e.b.x-e.a.x)*t+e.nx*dd,y:e.a.y+(e.b.y-e.a.y)*t+e.ny*dd}});
+  const ring=i=>cells[i].flatMap(({e,fwd})=>{const P=pts(e);return (fwd?P:P.reverse()).slice(1)});
+  const area=P=>P.reduce((acc,p,k)=>{const q=P[(k+1)%P.length];return acc+p.x*q.y-q.x*p.y},0)/2;
+  // area gained by each cell per unit of bulge on each edge (exactly linear), then the smallest bulges that equalise all areas
+  const n=HEX.length, A=HEX.map(()=>new Float64Array(E.length));
+  E.forEach(e=>{const b0=e.cells.map(c=>area(ring(c)));e.h=1;e.cells.forEach((c,m)=>A[c][e.id]=area(ring(c))-b0[m]);e.h=0});
+  const cur=HEX.map((_,i)=>area(ring(i))), goal=cur.reduce((x,y)=>x+y,0)/n, rhs=cur.map(v=>goal-v);
+  const M=HEX.map((_,i)=>HEX.map((_,j)=>A[i].reduce((acc,v,k)=>acc+v*A[j][k],0)));
+  for(let c=0;c<n;c++){let piv=c;for(let r=c+1;r<n;r++)if(Math.abs(M[r][c])>Math.abs(M[piv][c]))piv=r;
+    [M[c],M[piv]]=[M[piv],M[c]];[rhs[c],rhs[piv]]=[rhs[piv],rhs[c]];
+    for(let r=0;r<n;r++){if(r===c)continue;const f=M[r][c]/M[c][c];if(!f)continue;for(let k=c;k<n;k++)M[r][k]-=f*M[c][k];rhs[r]-=f*rhs[c]}}
+  const y=rhs.map((v,c)=>v/M[c][c]);
+  E.forEach(e=>e.h=e.cells.reduce((acc,c)=>acc+A[c][e.id]*y[c],0));
+  const f=v=>v.toFixed(1), rings=HEX.map((_,i)=>ring(i));
+  const cellD=rings.map(P=>"M"+P.map(p=>f(p.x)+","+f(p.y)).join("L")+"Z");
+  const cen=rings.map(P=>{const a6=area(P)*6;let x=0,yy=0;P.forEach((p,k)=>{const q=P[(k+1)%P.length],cr=p.x*q.y-q.x*p.y;x+=(p.x+q.x)*cr;yy+=(p.y+q.y)*cr});return {x:x/a6,y:yy/a6}});
+  const edgeList=E.map(e=>{const P=pts(e);return {i:e.cells[0],j:e.cells.length>1?e.cells[1]:-1,pts:P,d:"M"+P.map(p=>f(p.x)+","+f(p.y)).join("L")}});
+  return {seed,cellD,edgeList,cen,areas:rings.map(area)};
+}
+const shape=()=>(SHAPE&&SHAPE.seed===S.seed)?SHAPE:(SHAPE=buildShapes(S.seed));
 const defs=el("defs",{},svg);
 const gHex=el("g",{},svg), gFx=el("g",{},svg);
 // arrow: ring around the logo plus a long pointer, pointing up at rest
@@ -281,7 +321,7 @@ const gArrow=el("g",{visibility:"hidden"},gFx);
 el("circle",{r:R*.62,fill:"none",stroke:"#F5C542","stroke-width":6,"stroke-dasharray":"14 9"},gArrow);
 const needle=el("g",{},gArrow);
 el("path",{d:`M0,${-R*1.75} L${R*.3},${-R*1.18} L${R*.11},${-R*1.18} L${R*.11},${-R*.68} L${-R*.11},${-R*.68} L${-R*.11},${-R*1.18} L${-R*.3},${-R*1.18} Z`,fill:"#F5C542",stroke:"#070B24","stroke-width":5,"stroke-linejoin":"round"},needle);
-const target=el("polygon",{fill:"none",stroke:"#FF4B5C","stroke-width":9,visibility:"hidden","stroke-linejoin":"round"},gFx);
+const target=el("path",{fill:"none",stroke:"#FF4B5C","stroke-width":9,visibility:"hidden","stroke-linejoin":"round"},gFx);
 
 function renderMap(){
   svg.setAttribute("viewBox",view.join(" "));
@@ -291,21 +331,14 @@ function renderMap(){
     const g=el("radialGradient",{id:"g-"+t.id,cx:"50%",cy:"40%",r:"65%"},defs);
     el("stop",{offset:"0%","stop-color":shade(t.c1,.12)},g); el("stop",{offset:"100%","stop-color":shade(t.c1,-.2)},g);
   });
+  const SH=shape();
   HEX.forEach((h,i)=>{
     const t=T[S.owner[i]];
-    const g=el("g",{"data-i":i},gHex);
-    el("polygon",{points:hexPts(h.x,h.y,R),fill:`url(#g-${t.id})`,stroke:shade(t.c1,-.3),class:"hex"+(focus.size&&!focus.has(t.id)?" dim":""),"data-hex":i},g);
+    el("path",{d:SH.cellD[i],fill:t.c1,stroke:t.c1,class:"hex"+(focus.size&&!focus.has(t.id)?" dim":""),"data-hex":i},gHex);
   });
-  // borders: thin inside a team's land, thick where two teams (or the map edge) meet
-  const edges=[];
-  HEX.forEach((h,i)=>{ for(let k=0;k<6;k++){
-    const a=Math.PI/180*60*k, nx=h.x+W*Math.cos(a), ny=h.y+W*Math.sin(a);
-    const j=HEX.findIndex(o=>Math.hypot(o.x-nx,o.y-ny)<5);
-    if(j!==-1&&(j<i||S.owner[j]===S.owner[i])) continue;
-    const v1=Math.PI/180*(60*k-30), v2=Math.PI/180*(60*k+30);
-    edges.push(`M${(h.x+R*Math.cos(v1)).toFixed(1)},${(h.y+R*Math.sin(v1)).toFixed(1)}L${(h.x+R*Math.cos(v2)).toFixed(1)},${(h.y+R*Math.sin(v2)).toFixed(1)}`);
-  }});
-  el("path",{d:edges.join(""),fill:"none",stroke:"#070B24","stroke-width":8,"stroke-linecap":"round","pointer-events":"none"},gHex);
+  // borders only where two teams (or the map edge) meet; one team's blocks merge into one land
+  const edges=SH.edgeList.filter(e=>e.j<0||S.owner[e.i]!==S.owner[e.j]).map(e=>e.d);
+  el("path",{d:edges.join(""),fill:"none",stroke:"#070B24","stroke-width":8,"stroke-linecap":"round","stroke-linejoin":"round","pointer-events":"none"},gHex);
   const LO=logoLayout();
   for(const id in LO){ const {x,y,s}=LO[id];
     const holder=el("g",{transform:`translate(${x-s/2},${y-s/2}) scale(${s/100})`,opacity:focus.size&&!focus.has(id)?.35:1,"pointer-events":"none",class:"logo"},gHex);
@@ -317,7 +350,7 @@ function renderMap(){
     gArrow.setAttribute("visibility","visible"); gArrow.setAttribute("transform",`translate(${a.x},${a.y}) scale(${(LO[S.att]?.s||BASE_LOGO)/BASE_LOGO})`);
     needle.setAttribute("transform",`rotate(${arrowRot})`);
   } else gArrow.setAttribute("visibility","hidden");
-  if(S.phase==="match"&&S.defHex!=null){const h=HEX[S.defHex];target.setAttribute("points",hexPts(h.x,h.y,R-6));target.setAttribute("visibility","visible")}
+  if(S.phase==="match"&&S.defHex!=null){target.setAttribute("d",shape().cellD[S.defHex]);target.setAttribute("visibility","visible")}
   else target.setAttribute("visibility","hidden");
 }
 function animate(ms,step){return new Promise(res=>{if(reduced)ms=Math.min(ms,300);const t0=performance.now();(function f(now){const t=Math.min(1,(now-t0)/ms);step(t);if(t<1)requestAnimationFrame(f);else res()})(t0)})}
