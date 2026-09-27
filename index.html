@@ -100,7 +100,7 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
 .events{display:grid;grid-template-columns:1fr 1fr;gap:4px 40px;width:min(720px,80vw);max-height:22vh;overflow:auto;font-size:15px}
 .events .ev{color:var(--ink)} .events .evL{text-align:right} .events b{color:var(--gold);font-weight:800}
 .pens{font-size:15px;color:var(--muted);text-align:center;min-height:20px;display:flex;flex-direction:column;gap:4px}
-.pens .pl .dots{font-style:normal;color:var(--gold);letter-spacing:.15em;font-size:18px}
+.pens .pl .dots{font-style:normal;letter-spacing:.15em;font-size:18px}.pens .dots .ok{color:#2ECC71}.pens .dots .miss{color:#FF4B5C}
 .squad{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;width:min(1080px,88vw);max-height:48vh;overflow:auto;padding:2px}
 .squad button{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:10px;text-align:left;padding:8px 10px}
 .squad .o{font-family:var(--display);font-weight:800;font-size:22px;color:var(--gold);text-align:center}
@@ -872,7 +872,7 @@ async function playSim(d,a){
   cl.textContent=L("ft");
   if(r.so){ const pe=document.getElementById("mPens"); let x="",y="";
     const draw=()=>{pe.innerHTML=`<b>${L("pens")}</b><div class="pl">${tn(d)} <i class="dots">${x}</i></div><div class="pl">${tn(a)} <i class="dots">${y}</i></div>`};
-    draw(); for(const [u,v] of r.so.seq){ await wait(350); x+=u?"●":"○"; draw(); await wait(350); y+=v?"●":"○"; draw(); }
+    draw(); for(const [u,v] of r.so.seq){ await wait(350); x+=u?"<b class=ok>●</b>":"<b class=miss>●</b>"; draw(); await wait(350); y+=v?"<b class=ok>●</b>":"<b class=miss>●</b>"; draw(); }
     const w=T[r.win]; pe.insertAdjacentHTML("beforeend",`<div>${L("penWin").replace("{t}",tn(w)).replace("{a}",Math.max(r.so.a,r.so.b)).replace("{b}",Math.min(r.so.a,r.so.b))}</div>`); }
   fanfare(); busy=false; renderSide();
   document.getElementById("mCtl").innerHTML=`<button class="primary" id="mGo">${L("cont")}</button>`;
