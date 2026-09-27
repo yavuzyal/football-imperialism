@@ -568,6 +568,7 @@ function buildShapes(seed){
   const edgeList=E.map(e=>{const P=pts(e);return {i:e.cells[0],j:e.cells.length>1?e.cells[1]:-1,pts:P,d:"M"+P.map(p=>f(p.x)+","+f(p.y)).join("L")}});
   return {seed,cellD,edgeList,cen,rings,areas:rings.map(area)};
 }
+const isFinal=()=>alive().length===2&&S.phase==="match";
 const shape=()=>(SHAPE&&SHAPE.seed===S.seed)?SHAPE:(SHAPE=buildShapes(S.seed));
 const defs=el("defs",{},svg);
 const gHex=el("g",{},svg), gFx=el("g",{},svg);
@@ -601,12 +602,12 @@ function renderMap(){
     holder.innerHTML=crestSVG(T[id]).replace(/^<svg[^>]*>|<\/svg>$/g,"");
   }
   // arrow
-  if(S.att&&(S.phase==="arrow"||S.phase==="match")){
+  if(S.att&&(S.phase==="arrow"||S.phase==="match")&&!isFinal()){
     const a=logoSpot(S.att);
     gArrow.setAttribute("visibility","visible"); gArrow.setAttribute("transform",`translate(${a.x},${a.y}) scale(${(LO[S.att]?.s||BASE_LOGO)/BASE_LOGO})`);
     needle.setAttribute("transform",`rotate(${arrowRot})`);
   } else gArrow.setAttribute("visibility","hidden");
-  if(S.phase==="match"&&S.defHex!=null){target.setAttribute("d",shape().cellD[S.defHex]);target.setAttribute("visibility","visible")}
+  if(S.phase==="match"&&S.defHex!=null&&!isFinal()){target.setAttribute("d",shape().cellD[S.defHex]);target.setAttribute("visibility","visible")}
   else target.setAttribute("visibility","hidden");
 }
 function animate(ms,step){return new Promise(res=>{if(reduced)ms=Math.min(ms,300);const t0=performance.now();(function f(now){const t=Math.min(1,(now-t0)/ms);step(t);if(t<1)requestAnimationFrame(f);else res()})(t0)})}
@@ -722,6 +723,9 @@ async function spin(cv){
   wheelRot=((end%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
   const t=atPointer(); drawWheel(cv,t.id); fanfare();
   await new Promise(r=>setTimeout(r,700));
+  if(alive().length===2){ // the final: the other team defends, so no arrow; straight to the match
+    S.att=t.id;S.def=alive().find(x=>x.id!==t.id).id;S.defHex=hexesOf(S.def)[0];S.angle=null;S.phase="match";save();busy=false;
+    closePop(); renderAll(); openMatch(); return }
   S.att=t.id;S.def=null;S.defHex=null;S.angle=0;arrowRot=0;S.phase="arrow";save();busy=false;
   pop.innerHTML=`<div class="overlay" id="aOv"><div class="pop"><h3>${L("attackerIs")}</h3>
     <div class="winner">${crestSVG(t)}<div class="name">${tn(t)}</div></div>
@@ -979,7 +983,7 @@ document.getElementById("bMenu").onclick=()=>{if(!busy) showMenu(true)};
 function setLeague(id){
   if(id!==LEAGUE){ LEAGUE=id; TEAMS=LEAGUES[id].teams; {const rows=LEAGUES[id].rows||ROWS; buildGrid(TEAMS.length/rows,rows);} T=Object.fromEntries(TEAMS.map(t=>[t.id,t])); KEY=LEAGUES[id].key;
     loadState(); SHAPE=null; LOGO_CACHE.key=null; confirmNew=false; arrowRot=S.angle||0; closePop();
-    view=(S.att&&(S.phase==="arrow"||S.phase==="match"))?focusBox(S.att):FULL.slice(); renderAll(); loadLogos();
+    view=(S.att&&(S.phase==="arrow"||S.phase==="match")&&!isFinal())?focusBox(S.att):FULL.slice(); renderAll(); loadLogos();
     if(S.phase==="match") openMatch(); }
   showMenu(false);
 }
@@ -998,7 +1002,7 @@ document.getElementById("bUndo").onclick=async()=>{const e=S.log.pop();if(!e)ret
 document.getElementById("bShuffle").onclick=()=>{if(S.log.length||S.phase!=="wheel"||busy)return;confirmNew=false;S=fresh();save();view=FULL.slice();renderAll()};
 document.getElementById("bNew").onclick=()=>{confirmNew=true;renderSide()};
 
-if(S.att&&(S.phase==="arrow"||S.phase==="match")) view=focusBox(S.att);
+if(S.att&&(S.phase==="arrow"||S.phase==="match")&&!isFinal()) view=focusBox(S.att);
 /* ---------- sound (made in the browser, no audio files) ---------- */
 const SKEY="football-imperialism-sound";
 let soundOn=true; try{soundOn=localStorage.getItem(SKEY)!=="off"}catch(e){}
