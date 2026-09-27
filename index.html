@@ -790,16 +790,32 @@ function squad(id){
   return out.sort((a,b)=>b[3]-a[3]);
 }
 const SLOTS=[["GK",["GK"]],["LB",["LB","LWB"]],["CB",["CB"]],["CB",["CB"]],["RB",["RB","RWB"]],["CDM",["CDM","CM"]],["CM",["CM","CDM","CAM"]],["CAM",["CAM","CM"]],["LW",["LW","LM"]],["ST",["ST","CF"]],["RW",["RW","RM"]]];
-function bestXI(id,add){ // 4-3-3: every slot takes the best player who can play it (main or alternate position); add previews a new signing
-  const sq=add?squad(id).concat([add]).sort((a,b)=>b[3]-a[3]):squad(id), used=new Set(), xi=[];
-  const fits=(p,ok)=>ok.includes(p[1])||(p[2]||"").split(/\s+/).some(q=>ok.includes(q));
-  const order=[0,2,3,1,4,9,8,10,5,6,7];
-  for(const i of order){ const [slot,ok]=SLOTS[i];
-    let pick=sq.find(p=>!used.has(p)&&fits(p,ok)), pen=0;
-    if(!pick){ pick=sq.find(p=>!used.has(p)&&(slot==="GK")===(p[1]==="GK")); pen=slot==="GK"?0:8 } // out of position costs 8
-    if(!pick){ pick=sq.find(p=>!used.has(p)); pen=slot==="GK"?40:8 }
-    if(pick){ used.add(pick); xi[i]={p:pick,slot,pen} } }
-  return xi.filter(Boolean);
+function hungarian(C){ // min-cost assignment of n rows to m>=n columns; returns the column for each row
+  const n=C.length, m=C[0].length, u=new Array(n+1).fill(0), v=new Array(m+1).fill(0), p=new Array(m+1).fill(0), way=new Array(m+1).fill(0);
+  for(let i=1;i<=n;i++){ p[0]=i; let j0=0; const minv=new Array(m+1).fill(Infinity), usedC=new Array(m+1).fill(false);
+    do{ usedC[j0]=true; const i0=p[j0]; let d=Infinity, j1=0;
+      for(let j=1;j<=m;j++) if(!usedC[j]){ const cur=C[i0-1][j-1]-u[i0]-v[j]; if(cur<minv[j]){minv[j]=cur;way[j]=j0} if(minv[j]<d){d=minv[j];j1=j} }
+      for(let j=0;j<=m;j++) if(usedC[j]){u[p[j]]+=d;v[j]-=d} else minv[j]-=d;
+      j0=j1 } while(p[j0]!==0);
+    do{ const j1=way[j0]; p[j0]=p[j1]; j0=j1 } while(j0) }
+  const res=new Array(n); for(let j=1;j<=m;j++) if(p[j]) res[p[j]-1]=j-1; return res;
+}
+function bestXI(id,add){ // 4-3-3 with the best total rating; players go out of position only when no one fits a slot
+  const sq=add?squad(id).concat([add]).sort((a,b)=>b[3]-a[3]):squad(id);
+  if(!sq.length) return [];
+  const line=pos=>pos==="GK"?0:/B$/.test(pos)?1:/^(CDM|CM|CAM|LM|RM)$/.test(pos)?2:3;
+  const fit=(p,i)=>{ const [slot,ok]=SLOTS[i];
+    if(ok.includes(p[1])) return {pen:0,cost:-p[3]*10};
+    if((p[2]||"").split(/\s+/).some(q=>ok.includes(q))) return {pen:0,cost:-p[3]*10+3}; // main position wins a tie
+    if(slot==="GK") return {pen:40,cost:1e5-p[3]*10};
+    if(p[1]==="GK") return {pen:40,cost:1e5-p[3]*10};
+    return {pen:8,cost:1e4-(p[3]-8)*10+50*Math.abs(line(p[1])-line(slot))}; // out of position costs 8; nearest line preferred
+  };
+  const cols=sq.length>=11?sq:sq.concat(Array(11-sq.length).fill(null));
+  const C=SLOTS.map((_,i)=>cols.map(p=>p?fit(p,i).cost:1e6));
+  const pick=hungarian(C), xi=[];
+  SLOTS.forEach(([slot],i)=>{ const p=cols[pick[i]]; if(p) xi.push({p,slot,pen:fit(p,i).pen}) });
+  return xi;
 }
 function strength(id,add){
   const xi=bestXI(id,add); if(xi.length<11) return null;
