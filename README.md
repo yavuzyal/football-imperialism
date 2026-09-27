@@ -10,6 +10,6 @@ The game saves in your browser, so you can close the tab between matches.
 
 ## Logos
 
-Logos are named after the team id: Champions League in `logos/`, Europa League in `logos/uel/`, Premier League in `logos/epl/`, Süper Lig in `logos/tsl/`, LaLiga in `logos/lal/`. Replace a file there to change a logo (`.png`, `.svg` or `.webp`).
+Logos are named after the team id: Champions League in `logos/`, Europa League in `logos/uel/`, Premier League in `logos/epl/`, Süper Lig in `logos/tsl/`, LaLiga in `logos/lal/`, Bundesliga in `logos/bl/`. Replace a file there to change a logo (`.png`, `.svg` or `.webp`).
 
 aek, arsenal, aston-villa, atletico, barcelona, bayern, bodo-glimt, dortmund, club-brugge, como, fenerbahce, feyenoord, galatasaray, inter, lask, leipzig, lens, lille, liverpool, man-city, man-united, napoli, psg, porto, psv, betis, real-madrid, roma, sabah, shakhtar, slavia, slovan, sporting, stuttgart, viking, villarreal
