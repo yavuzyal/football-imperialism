@@ -127,6 +127,8 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
       <span><b data-t="uel">Europa League</b><small id="uelSub">36 teams</small></span></button>
     <button class="league" id="lgEPL"><img src="img/premier-league.png" alt="" width="58" height="58">
       <span><b data-t="epl">Premier League</b><small id="eplSub">20 teams</small></span></button>
+    <button class="league" id="lgTSL"><img src="img/super-lig.png" alt="" width="58" height="58">
+      <span><b data-t="tsl" lang="tr">Süper Lig</b><small id="tslSub">18 teams</small></span></button>
   </div>
   <div id="menuLang"></div>
 </div>
@@ -146,12 +148,12 @@ const FLAGS={
 };
 const LANGS=[["tr","TUR"],["de","GER"],["en","ENG"],["fr","FRA"],["it","ITA"],["es","ESP"]];
 const STR={
-  en:{epl:"Premier League",uel:"Europa League",soon:"Teams coming soon",menu:"Menu",chooseLeague:"Choose a league",ucl:"Champions League",teamsN:"{n} teams",shuffle:"Randomize",fsOn:"Full screen",fsOff:"Exit full screen",soundOn:"Sound on",soundOff:"Sound off",title:"Football Imperialism",wheel:"Spin the wheel",arrow:"Spin the arrow",cancel:"Cancel turn",undo:"Undo",newGame:"New game",confirmQ:"Reshuffle and clear all results?",confirmYes:"Start new game",confirmNo:"Keep playing",whoAttacks:"Who attacks?",spin:"Spin",close:"Close",attackerIs:"The attacker is",goMap:"Go to the map",defends:"Defends",attacks:"Attacks",hint:"Play it in FC27, then pick the winner. The winner takes all of the loser's land.",won:"{t} won",championEng:"Champion of England",champion:"Champion of Europe",holds:"Holds all {m} blocks after {n} matches.",wheelAria:"Wheel of teams that still hold land",mapAria:"Hexagon map of Champions League teams",language:"Language"},
-  tr:{epl:"Premier Lig",uel:"Avrupa Ligi",soon:"Takımlar yakında",menu:"Menü",chooseLeague:"Bir lig seç",ucl:"Şampiyonlar Ligi",teamsN:"{n} takım",shuffle:"Karıştır",fsOn:"Tam ekran",fsOff:"Tam ekrandan çık",soundOn:"Ses açık",soundOff:"Ses kapalı",title:"Futbol Emperyalizmi",wheel:"Çarkı çevir",arrow:"Oku çevir",cancel:"Turu iptal et",undo:"Geri al",newGame:"Yeni oyun",confirmQ:"Takımlar karıştırılsın ve tüm sonuçlar silinsin mi?",confirmYes:"Yeni oyuna başla",confirmNo:"Oynamaya devam et",whoAttacks:"Kim saldırıyor?",spin:"Çevir",close:"Kapat",attackerIs:"Saldıran takım",goMap:"Haritaya git",defends:"Savunuyor",attacks:"Saldırıyor",hint:"Maçı FC27'de oyna, sonra kazananı seç. Kazanan, kaybedenin tüm topraklarını alır.",won:"{t} kazandı",championEng:"İngiltere Şampiyonu",champion:"Avrupa Şampiyonu",holds:"{n} maçın sonunda {m} bölgenin hepsine sahip.",wheelAria:"Toprağı olan takımların çarkı",mapAria:"Şampiyonlar Ligi takımlarının altıgen haritası",language:"Dil"},
-  de:{epl:"Premier League",uel:"Europa League",soon:"Teams folgen bald",menu:"Menü",chooseLeague:"Wähle eine Liga",ucl:"Champions League",teamsN:"{n} Teams",shuffle:"Neu mischen",fsOn:"Vollbild",fsOff:"Vollbild beenden",soundOn:"Ton an",soundOff:"Ton aus",title:"Fußball-Imperialismus",wheel:"Rad drehen",arrow:"Pfeil drehen",cancel:"Zug abbrechen",undo:"Rückgängig",newGame:"Neues Spiel",confirmQ:"Neu mischen und alle Ergebnisse löschen?",confirmYes:"Neues Spiel starten",confirmNo:"Weiterspielen",whoAttacks:"Wer greift an?",spin:"Drehen",close:"Schließen",attackerIs:"Der Angreifer ist",goMap:"Zur Karte",defends:"Verteidigt",attacks:"Greift an",hint:"Spiel es in FC27 und wähle dann den Sieger. Der Sieger übernimmt das gesamte Gebiet des Verlierers.",won:"{t} gewinnt",championEng:"Englischer Meister",champion:"Europas Champion",holds:"Besitzt nach {n} Spielen alle {m} Felder.",wheelAria:"Rad der Teams, die noch Gebiet haben",mapAria:"Sechseckkarte der Champions-League-Teams",language:"Sprache"},
-  fr:{epl:"Premier League",uel:"Ligue Europa",soon:"Équipes bientôt",menu:"Menu",chooseLeague:"Choisis une ligue",ucl:"Ligue des champions",teamsN:"{n} équipes",shuffle:"Mélanger",fsOn:"Plein écran",fsOff:"Quitter le plein écran",soundOn:"Son activé",soundOff:"Son coupé",title:"Impérialisme du football",wheel:"Tourner la roue",arrow:"Tourner la flèche",cancel:"Annuler le tour",undo:"Revenir",newGame:"Nouvelle partie",confirmQ:"Mélanger et effacer tous les résultats ?",confirmYes:"Lancer une nouvelle partie",confirmNo:"Continuer",whoAttacks:"Qui attaque ?",spin:"Tourner",close:"Fermer",attackerIs:"L'attaquant est",goMap:"Aller à la carte",defends:"Défend",attacks:"Attaque",hint:"Jouez-le sur FC27, puis choisissez le vainqueur. Le vainqueur prend tout le territoire du perdant.",won:"{t} gagne",championEng:"Champion d'Angleterre",champion:"Champion d'Europe",holds:"Possède les {m} cases après {n} matchs.",wheelAria:"Roue des équipes qui ont encore un territoire",mapAria:"Carte hexagonale des équipes de Ligue des champions",language:"Langue"},
-  it:{epl:"Premier League",uel:"Europa League",soon:"Squadre in arrivo",menu:"Menu",chooseLeague:"Scegli un campionato",ucl:"Champions League",teamsN:"{n} squadre",shuffle:"Mescola",fsOn:"Schermo intero",fsOff:"Esci da schermo intero",soundOn:"Audio attivo",soundOff:"Audio disattivato",title:"Imperialismo calcistico",wheel:"Gira la ruota",arrow:"Gira la freccia",cancel:"Annulla turno",undo:"Indietro",newGame:"Nuova partita",confirmQ:"Rimescolare e cancellare tutti i risultati?",confirmYes:"Inizia nuova partita",confirmNo:"Continua a giocare",whoAttacks:"Chi attacca?",spin:"Gira",close:"Chiudi",attackerIs:"L'attaccante è",goMap:"Vai alla mappa",defends:"Difende",attacks:"Attacca",hint:"Giocala su FC27, poi scegli il vincitore. Il vincitore prende tutto il territorio dello sconfitto.",won:"Vince {t}",championEng:"Campione d'Inghilterra",champion:"Campione d'Europa",holds:"Possiede tutte le {m} caselle dopo {n} partite.",wheelAria:"Ruota delle squadre che hanno ancora territorio",mapAria:"Mappa esagonale delle squadre di Champions League",language:"Lingua"},
-  es:{epl:"Premier League",uel:"Liga Europa",soon:"Equipos próximamente",menu:"Menú",chooseLeague:"Elige una liga",ucl:"Liga de Campeones",teamsN:"{n} equipos",shuffle:"Mezclar",fsOn:"Pantalla completa",fsOff:"Salir de pantalla completa",soundOn:"Sonido activado",soundOff:"Sonido desactivado",title:"Imperialismo futbolístico",wheel:"Girar la ruleta",arrow:"Girar la flecha",cancel:"Cancelar turno",undo:"Deshacer",newGame:"Nueva partida",confirmQ:"¿Mezclar y borrar todos los resultados?",confirmYes:"Empezar nueva partida",confirmNo:"Seguir jugando",whoAttacks:"¿Quién ataca?",spin:"Girar",close:"Cerrar",attackerIs:"El atacante es",goMap:"Ir al mapa",defends:"Defiende",attacks:"Ataca",hint:"Juega el partido en FC27 y elige al ganador. El ganador se queda con todo el territorio del perdedor.",won:"Gana {t}",championEng:"Campeón de Inglaterra",champion:"Campeón de Europa",holds:"Tiene las {m} casillas tras {n} partidos.",wheelAria:"Ruleta de los equipos que aún tienen territorio",mapAria:"Mapa hexagonal de los equipos de la Champions League",language:"Idioma"}
+  en:{tsl:"Süper Lig",epl:"Premier League",uel:"Europa League",soon:"Teams coming soon",menu:"Menu",chooseLeague:"Choose a league",ucl:"Champions League",teamsN:"{n} teams",shuffle:"Randomize",fsOn:"Full screen",fsOff:"Exit full screen",soundOn:"Sound on",soundOff:"Sound off",title:"Football Imperialism",wheel:"Spin the wheel",arrow:"Spin the arrow",cancel:"Cancel turn",undo:"Undo",newGame:"New game",confirmQ:"Reshuffle and clear all results?",confirmYes:"Start new game",confirmNo:"Keep playing",whoAttacks:"Who attacks?",spin:"Spin",close:"Close",attackerIs:"The attacker is",goMap:"Go to the map",defends:"Defends",attacks:"Attacks",hint:"Play it in FC27, then pick the winner. The winner takes all of the loser's land.",won:"{t} won",championTur:"Champion of Türkiye",championEng:"Champion of England",champion:"Champion of Europe",holds:"Holds all {m} blocks after {n} matches.",wheelAria:"Wheel of teams that still hold land",mapAria:"Hexagon map of Champions League teams",language:"Language"},
+  tr:{tsl:"Süper Lig",epl:"Premier Lig",uel:"Avrupa Ligi",soon:"Takımlar yakında",menu:"Menü",chooseLeague:"Bir lig seç",ucl:"Şampiyonlar Ligi",teamsN:"{n} takım",shuffle:"Karıştır",fsOn:"Tam ekran",fsOff:"Tam ekrandan çık",soundOn:"Ses açık",soundOff:"Ses kapalı",title:"Futbol Emperyalizmi",wheel:"Çarkı çevir",arrow:"Oku çevir",cancel:"Turu iptal et",undo:"Geri al",newGame:"Yeni oyun",confirmQ:"Takımlar karıştırılsın ve tüm sonuçlar silinsin mi?",confirmYes:"Yeni oyuna başla",confirmNo:"Oynamaya devam et",whoAttacks:"Kim saldırıyor?",spin:"Çevir",close:"Kapat",attackerIs:"Saldıran takım",goMap:"Haritaya git",defends:"Savunuyor",attacks:"Saldırıyor",hint:"Maçı FC27'de oyna, sonra kazananı seç. Kazanan, kaybedenin tüm topraklarını alır.",won:"{t} kazandı",championTur:"Türkiye Şampiyonu",championEng:"İngiltere Şampiyonu",champion:"Avrupa Şampiyonu",holds:"{n} maçın sonunda {m} bölgenin hepsine sahip.",wheelAria:"Toprağı olan takımların çarkı",mapAria:"Şampiyonlar Ligi takımlarının altıgen haritası",language:"Dil"},
+  de:{tsl:"Süper Lig",epl:"Premier League",uel:"Europa League",soon:"Teams folgen bald",menu:"Menü",chooseLeague:"Wähle eine Liga",ucl:"Champions League",teamsN:"{n} Teams",shuffle:"Neu mischen",fsOn:"Vollbild",fsOff:"Vollbild beenden",soundOn:"Ton an",soundOff:"Ton aus",title:"Fußball-Imperialismus",wheel:"Rad drehen",arrow:"Pfeil drehen",cancel:"Zug abbrechen",undo:"Rückgängig",newGame:"Neues Spiel",confirmQ:"Neu mischen und alle Ergebnisse löschen?",confirmYes:"Neues Spiel starten",confirmNo:"Weiterspielen",whoAttacks:"Wer greift an?",spin:"Drehen",close:"Schließen",attackerIs:"Der Angreifer ist",goMap:"Zur Karte",defends:"Verteidigt",attacks:"Greift an",hint:"Spiel es in FC27 und wähle dann den Sieger. Der Sieger übernimmt das gesamte Gebiet des Verlierers.",won:"{t} gewinnt",championTur:"Türkischer Meister",championEng:"Englischer Meister",champion:"Europas Champion",holds:"Besitzt nach {n} Spielen alle {m} Felder.",wheelAria:"Rad der Teams, die noch Gebiet haben",mapAria:"Sechseckkarte der Champions-League-Teams",language:"Sprache"},
+  fr:{tsl:"Süper Lig",epl:"Premier League",uel:"Ligue Europa",soon:"Équipes bientôt",menu:"Menu",chooseLeague:"Choisis une ligue",ucl:"Ligue des champions",teamsN:"{n} équipes",shuffle:"Mélanger",fsOn:"Plein écran",fsOff:"Quitter le plein écran",soundOn:"Son activé",soundOff:"Son coupé",title:"Impérialisme du football",wheel:"Tourner la roue",arrow:"Tourner la flèche",cancel:"Annuler le tour",undo:"Revenir",newGame:"Nouvelle partie",confirmQ:"Mélanger et effacer tous les résultats ?",confirmYes:"Lancer une nouvelle partie",confirmNo:"Continuer",whoAttacks:"Qui attaque ?",spin:"Tourner",close:"Fermer",attackerIs:"L'attaquant est",goMap:"Aller à la carte",defends:"Défend",attacks:"Attaque",hint:"Jouez-le sur FC27, puis choisissez le vainqueur. Le vainqueur prend tout le territoire du perdant.",won:"{t} gagne",championTur:"Champion de Turquie",championEng:"Champion d'Angleterre",champion:"Champion d'Europe",holds:"Possède les {m} cases après {n} matchs.",wheelAria:"Roue des équipes qui ont encore un territoire",mapAria:"Carte hexagonale des équipes de Ligue des champions",language:"Langue"},
+  it:{tsl:"Süper Lig",epl:"Premier League",uel:"Europa League",soon:"Squadre in arrivo",menu:"Menu",chooseLeague:"Scegli un campionato",ucl:"Champions League",teamsN:"{n} squadre",shuffle:"Mescola",fsOn:"Schermo intero",fsOff:"Esci da schermo intero",soundOn:"Audio attivo",soundOff:"Audio disattivato",title:"Imperialismo calcistico",wheel:"Gira la ruota",arrow:"Gira la freccia",cancel:"Annulla turno",undo:"Indietro",newGame:"Nuova partita",confirmQ:"Rimescolare e cancellare tutti i risultati?",confirmYes:"Inizia nuova partita",confirmNo:"Continua a giocare",whoAttacks:"Chi attacca?",spin:"Gira",close:"Chiudi",attackerIs:"L'attaccante è",goMap:"Vai alla mappa",defends:"Difende",attacks:"Attacca",hint:"Giocala su FC27, poi scegli il vincitore. Il vincitore prende tutto il territorio dello sconfitto.",won:"Vince {t}",championTur:"Campione di Turchia",championEng:"Campione d'Inghilterra",champion:"Campione d'Europa",holds:"Possiede tutte le {m} caselle dopo {n} partite.",wheelAria:"Ruota delle squadre che hanno ancora territorio",mapAria:"Mappa esagonale delle squadre di Champions League",language:"Lingua"},
+  es:{tsl:"Süper Lig",epl:"Premier League",uel:"Liga Europa",soon:"Equipos próximamente",menu:"Menú",chooseLeague:"Elige una liga",ucl:"Liga de Campeones",teamsN:"{n} equipos",shuffle:"Mezclar",fsOn:"Pantalla completa",fsOff:"Salir de pantalla completa",soundOn:"Sonido activado",soundOff:"Sonido desactivado",title:"Imperialismo futbolístico",wheel:"Girar la ruleta",arrow:"Girar la flecha",cancel:"Cancelar turno",undo:"Deshacer",newGame:"Nueva partida",confirmQ:"¿Mezclar y borrar todos los resultados?",confirmYes:"Empezar nueva partida",confirmNo:"Seguir jugando",whoAttacks:"¿Quién ataca?",spin:"Girar",close:"Cerrar",attackerIs:"El atacante es",goMap:"Ir al mapa",defends:"Defiende",attacks:"Ataca",hint:"Juega el partido en FC27 y elige al ganador. El ganador se queda con todo el territorio del perdedor.",won:"Gana {t}",championTur:"Campeón de Turquía",championEng:"Campeón de Inglaterra",champion:"Campeón de Europa",holds:"Tiene las {m} casillas tras {n} partidos.",wheelAria:"Ruleta de los equipos que aún tienen territorio",mapAria:"Mapa hexagonal de los equipos de la Champions League",language:"Idioma"}
 };
 const LKEY="football-imperialism-lang";
 let lang="en"; try{const v=localStorage.getItem(LKEY); if(STR[v]) lang=v;}catch(e){}
@@ -161,7 +163,7 @@ function applyLang(){
   document.documentElement.lang=lang; document.title=L("title");
   document.getElementById("map").setAttribute("aria-label",L("mapAria"));
   document.querySelectorAll("[data-t]").forEach(e=>e.textContent=L(e.dataset.t));
-  [["uclSub",36],["uelSub",36],["eplSub",20]].forEach(([id,n])=>{const e=document.getElementById(id); if(e) e.textContent=L("teamsN").replace("{n}",n)});
+  [["uclSub",36],["uelSub",36],["eplSub",20],["tslSub",18]].forEach(([id,n])=>{const e=document.getElementById(id); if(e) e.textContent=L("teamsN").replace("{n}",n)});
   if(typeof renderSound==="function") renderSound();
   if(typeof renderFull==="function") renderFull();
   const code=LANGS.find(l=>l[0]===lang)[1];
@@ -271,19 +273,42 @@ const EPL_TEAMS = [
   ["sunderland","Sunderland","SUN","#FE9EA8","#FFFFFF"],
   ["tottenham","Tottenham Hotspur","TOT","#BFC8EA","#FFFFFF"]
 ].map(([id,name,short,c1,c2,nameLang])=>({id,name,short,c1,c2,nameLang,logo:null}));
+const TSL_TEAMS = [
+  ["alanyaspor","Alanyaspor","ALN","#EF7A08","#FFFFFF","tr"],
+  ["amed","Amedspor","AMD","#6FA451","#FFFFFF","tr"],
+  ["basaksehir","Başakşehir","IBF","#034572","#FFFFFF","tr"],
+  ["besiktas","Beşiktaş","BJK","#E4E4E4","#FFFFFF","tr"],
+  ["corum","Çorum FK","ÇOR","#5B5B5B","#FFFFFF","tr"],
+  ["erzurumspor","Erzurumspor","ERZ","#3D8FD6","#FFFFFF","tr"],
+  ["eyupspor","Eyüpspor","EYP","#5B2D8E","#FFFFFF","tr"],
+  ["fenerbahce","Fenerbahçe","FB","#E2B207","#FFFFFF","tr"],
+  ["galatasaray","Galatasaray","GS","#A6192E","#FFFFFF","tr"],
+  ["gaziantep","Gaziantep FK","GFK","#B56056","#FFFFFF","tr"],
+  ["genclerbirligi","Gençlerbirliği","GB","#3B180E","#FFFFFF","tr"],
+  ["goztepe","Göztepe","GÖZ","#FFE474","#FFFFFF","tr"],
+  ["kasimpasa","Kasımpaşa","KAS","#0B0076","#FFFFFF","tr"],
+  ["kocaelispor","Kocaelispor","KOC","#225013","#FFFFFF","tr"],
+  ["konyaspor","Konyaspor","KON","#82D24F","#FFFFFF","tr"],
+  ["rizespor","Rizespor","RİZ","#108783","#FFFFFF","tr"],
+  ["samsunspor","Samsunspor","SAM","#F30418","#FFFFFF","tr"],
+  ["trabzonspor","Trabzonspor","TS","#6E1A37","#FFFFFF","tr"]
+].map(([id,name,short,c1,c2,nameLang])=>({id,name,short,c1,c2,nameLang,logo:null}));
 /* each league has its own teams, logo folder and saved game */
-const LEAGUES={ucl:{teams:UCL_TEAMS,key:"football-imperialism-ucl-v1",dir:"logos"},uel:{teams:UEL_TEAMS,key:"football-imperialism-uel-v1",dir:"logos/uel"},epl:{teams:EPL_TEAMS,key:"football-imperialism-epl-v1",dir:"logos/epl"}};
+const LEAGUES={ucl:{teams:UCL_TEAMS,key:"football-imperialism-ucl-v1",dir:"logos"},uel:{teams:UEL_TEAMS,key:"football-imperialism-uel-v1",dir:"logos/uel"},epl:{teams:EPL_TEAMS,key:"football-imperialism-epl-v1",dir:"logos/epl"},tsl:{teams:TSL_TEAMS,key:"football-imperialism-tsl-v1",dir:"logos/tsl",rows:3}};
 let LEAGUE="ucl", TEAMS=UCL_TEAMS, T=Object.fromEntries(TEAMS.map(t=>[t.id,t]));
 
 const COLS=9, ROWS=4, R=100, W=Math.sqrt(3)*R, PAD=40;
-/* smaller leagues use fewer columns, centred on the same 9x4 frame, so every land keeps its size */
-const HEX=[];
-function buildGrid(cols){ HEX.length=0; const off=(COLS-cols)/2*W;
-  for(let r=0;r<ROWS;r++) for(let c=0;c<cols;c++) HEX.push({x:off+PAD+W/2+c*W+(r%2)*W/2, y:PAD+R+r*1.5*R});
+/* smaller leagues use fewer columns, centred in the frame; fewer rows shrink the frame instead,
+   so the map still fills the same height and every land grows. The frame keeps the 9x4 shape. */
+const ASPECT=(PAD*2+W*(COLS+.5))/(PAD*2+R*(2+1.5*(ROWS-1)));
+const HEX=[], FULL=[0,0,0,0];
+let MAPW, MAPH, MINW;
+function buildGrid(cols,rows){ HEX.length=0;
+  MAPH=PAD*2+R*(2+1.5*(rows-1)); MAPW=MAPH*ASPECT; MINW=MAPW/6; FULL[2]=MAPW; FULL[3]=MAPH;
+  const off=(MAPW-(PAD*2+W*(cols+.5)))/2;
+  for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) HEX.push({x:off+PAD+W/2+c*W+(r%2)*W/2, y:PAD+R+r*1.5*R});
   HEX.forEach((h,i)=>h.nb=HEX.map((o,j)=>j).filter(j=>j!==i&&Math.hypot(HEX[j].x-h.x,HEX[j].y-h.y)<W*1.05)); }
-buildGrid(COLS);
-const MAPW=PAD*2+W*(COLS+.5), MAPH=PAD*2+R*(2+1.5*(ROWS-1));
-const FULL=[0,0,MAPW,MAPH];
+buildGrid(COLS,ROWS);
 const SPIN_MS=4000;
 const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -486,7 +511,7 @@ async function zoomTo(box){
 /* ---------- free zoom (scroll) and pan (press and drag) ----------
    While the player scrolls or drags, the whole map is drawn once and moved on the GPU; it is redrawn sharp a moment after they stop. */
 let live=null, commitT=null, drag=null;
-const MINW=MAPW/6, SLACK=W*1.3;
+const SLACK=W*1.3;
 function clampView(v){
   const w=Math.min(MAPW,Math.max(MINW,v[2])), h=w*MAPH/MAPW;
   const cx=v[0]+v[2]/2, cy=v[1]+v[3]/2;
@@ -626,7 +651,7 @@ async function result(win){
   S.att=S.def=S.defHex=null;S.phase=alive().length<=1?"over":"wheel";save();
   renderAll(); await new Promise(r=>setTimeout(r,reduced?100:1000)); // hold on the new border for a second
   await zoomTo(FULL); busy=false; renderAll();
-  if(S.phase==="over"){const c=alive()[0];pop.innerHTML=`<div class="overlay"><div class="pop"><h3>${L(LEAGUE==="epl"?"championEng":"champion")}</h3><div class="winner">${crestSVG(c)}<div class="name">${tn(c)}</div></div><div class="hint">${L("holds").replace("{n}",S.log.length).replace("{m}",HEX.length)}</div><button class="primary" id="pOk">${L("close")}</button></div></div>`;document.getElementById("pOk").onclick=closePop}
+  if(S.phase==="over"){const c=alive()[0];pop.innerHTML=`<div class="overlay"><div class="pop"><h3>${L(LEAGUE==="epl"?"championEng":LEAGUE==="tsl"?"championTur":"champion")}</h3><div class="winner">${crestSVG(c)}<div class="name">${tn(c)}</div></div><div class="hint">${L("holds").replace("{n}",S.log.length).replace("{m}",HEX.length)}</div><button class="primary" id="pOk">${L("close")}</button></div></div>`;document.getElementById("pOk").onclick=closePop}
 }
 
 /* ---------- side panel ---------- */
@@ -653,7 +678,7 @@ function showMenu(on){const lg=document.getElementById("lang"); document.getElem
   langOpen=false; applyLang()}
 document.getElementById("bMenu").onclick=()=>{if(!busy) showMenu(true)};
 function setLeague(id){
-  if(id!==LEAGUE){ LEAGUE=id; TEAMS=LEAGUES[id].teams; buildGrid(TEAMS.length/ROWS); T=Object.fromEntries(TEAMS.map(t=>[t.id,t])); KEY=LEAGUES[id].key;
+  if(id!==LEAGUE){ LEAGUE=id; TEAMS=LEAGUES[id].teams; {const rows=LEAGUES[id].rows||ROWS; buildGrid(TEAMS.length/rows,rows);} T=Object.fromEntries(TEAMS.map(t=>[t.id,t])); KEY=LEAGUES[id].key;
     loadState(); SHAPE=null; LOGO_CACHE.key=null; confirmNew=false; arrowRot=S.angle||0; closePop();
     view=(S.att&&(S.phase==="arrow"||S.phase==="match"))?focusBox(S.att):FULL.slice(); renderAll(); loadLogos();
     if(S.phase==="match") openMatch(); }
@@ -662,6 +687,7 @@ function setLeague(id){
 document.getElementById("lgUCL").onclick=()=>setLeague("ucl");
 document.getElementById("lgUEL").onclick=()=>setLeague("uel");
 document.getElementById("lgEPL").onclick=()=>setLeague("epl");
+document.getElementById("lgTSL").onclick=()=>setLeague("tsl");
 document.getElementById("bArrow").onclick=spinArrow;
 async function cancelTurn(){S.att=S.def=S.defHex=null;S.phase="wheel";save();renderAll();busy=true;await zoomTo(FULL);busy=false;renderSide()}
 document.getElementById("bCancel").onclick=cancelTurn;
