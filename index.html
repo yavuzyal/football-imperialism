@@ -954,7 +954,7 @@ async function result(win,steal){
   S.att=S.def=S.defHex=null;S.phase=alive().length<=1?"over":"wheel";save();
   renderAll(); await new Promise(r=>setTimeout(r,reduced?100:1000)); // hold on the new border for a second
   await zoomTo(FULL); busy=false; renderAll();
-  if(S.phase==="over"){const c=alive()[0];pop.innerHTML=`<div class="overlay"><div class="pop"><h3>${L(LEAGUE==="epl"?"championEng":LEAGUE==="tsl"?"championTur":LEAGUE==="lal"?"championEsp":LEAGUE==="bl"?"championGer":LEAGUE==="l1"?"championFra":LEAGUE==="sa"?"championIta":"champion")}</h3><div class="winner">${crestSVG(c)}<div class="name">${tn(c)}</div></div><div class="hint">${L("holds").replace("{n}",S.log.length).replace("{m}",HEX.length)}</div><button class="primary" id="pOk">${L("congrats")}</button></div></div>`;const stop=confetti([c.c1,"#F5C542","#35D6FF","#FFFFFF","#FF4B5C","#2ECC71"]);document.getElementById("pOk").onclick=()=>{stop();closePop()}}
+  if(S.phase==="over"){const c=alive()[0];pop.innerHTML=`<div class="overlay"><div class="pop"><h3>${L(LEAGUE==="epl"?"championEng":LEAGUE==="tsl"?"championTur":LEAGUE==="lal"?"championEsp":LEAGUE==="bl"?"championGer":LEAGUE==="l1"?"championFra":LEAGUE==="sa"?"championIta":"champion")}</h3><div class="winner">${crestSVG(c)}<div class="name">${tn(c)}</div></div><button class="primary" id="pOk">${L("congrats")}</button></div></div>`;const stop=confetti([c.c1,"#F5C542","#35D6FF","#FFFFFF","#FF4B5C","#2ECC71"]);document.getElementById("pOk").onclick=()=>{stop();closePop()}}
 }
 
 /* ---------- side panel ---------- */
