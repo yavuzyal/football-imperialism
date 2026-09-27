@@ -122,8 +122,8 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
   <div class="leagues">
     <button class="league" id="lgUCL"><img src="img/champions-league.png" alt="" width="58" height="58">
       <span><b data-t="ucl">Champions League</b><small id="uclSub">36 teams</small></span></button>
-    <button class="league" id="lgUEL" disabled><img src="img/europa-league.png" alt="" width="58" height="58">
-      <span><b data-t="uel">Europa League</b><small data-t="soon">Teams coming soon</small></span></button>
+    <button class="league" id="lgUEL"><img src="img/europa-league.png" alt="" width="58" height="58">
+      <span><b data-t="uel">Europa League</b><small id="uelSub">36 teams</small></span></button>
   </div>
   <div id="menuLang"></div>
 </div>
@@ -158,7 +158,7 @@ function applyLang(){
   document.documentElement.lang=lang; document.title=L("title");
   document.getElementById("map").setAttribute("aria-label",L("mapAria"));
   document.querySelectorAll("[data-t]").forEach(e=>e.textContent=L(e.dataset.t));
-  const us=document.getElementById("uclSub"); if(us) us.textContent=L("teamsN").replace("{n}",36);
+  ["uclSub","uelSub"].forEach(id=>{const e=document.getElementById(id); if(e) e.textContent=L("teamsN").replace("{n}",36)});
   if(typeof renderSound==="function") renderSound();
   if(typeof renderFull==="function") renderFull();
   const code=LANGS.find(l=>l[0]===lang)[1];
@@ -170,7 +170,7 @@ function applyLang(){
 }
 document.addEventListener("click",()=>{if(langOpen){langOpen=false;applyLang()}});
 
-const TEAMS = [
+const UCL_TEAMS = [
   ["aek","AEK Athens","AEK","#D6BE3E","#141414"],
   ["arsenal","Arsenal","ARS","#FA2300","#FFFFFF"],
   ["aston-villa","Aston Villa","AVL","#974881","#95BFE5"],
@@ -208,7 +208,47 @@ const TEAMS = [
   ["viking","Viking","VIK","#743444","#E4C06A"],
   ["villarreal","Villarreal","VIL","#E8D094","#005187"]
 ].map(([id,name,short,c1,c2])=>({id,name,short,c1,c2,logo:null}));
-const T = Object.fromEntries(TEAMS.map(t=>[t.id,t]));
+const UEL_TEAMS = [
+  ["anderlecht","Anderlecht","AND","#6C3586","#FFFFFF"],
+  ["ararat-armenia","Ararat-Armenia","ARA","#E4E4E4","#FFFFFF"],
+  ["az-alkmaar","AZ Alkmaar","AZ","#FB5A00","#FFFFFF"],
+  ["bayer-leverkusen","Bayer Leverkusen","B04","#ED012B","#FFFFFF"],
+  ["benfica","Benfica","SLB","#F4728F","#FFFFFF"],
+  ["besiktas","Beşiktaş","BJK","#686868","#FFFFFF","tr"],
+  ["bournemouth","Bournemouth","BOU","#C47360","#FFFFFF"],
+  ["celje","Celje","CEL","#373369","#FFFFFF"],
+  ["celta","Celta Vigo","CEV","#83D0F2","#FFFFFF"],
+  ["celtic","Celtic","CLT","#0C7B53","#FFFFFF"],
+  ["crystal-palace","Crystal Palace","CRY","#00244A","#FFFFFF"],
+  ["dinamo-zagreb","Dinamo Zagreb","DZG","#035684","#FFFFFF"],
+  ["ferencvaros","Ferencváros","FTC","#015537","#FFFFFF"],
+  ["hapoel-beer-sheva","Hapoel Beer-Sheva","HBS","#920038","#FFFFFF"],
+  ["hoffenheim","Hoffenheim","TSG","#7187BB","#FFFFFF"],
+  ["jagiellonia","Jagiellonia","JAG","#D4B448","#FFFFFF"],
+  ["juventus","Juventus","JUV","#B5B5B5","#FFFFFF"],
+  ["lech-poznan","Lech Poznań","LPO","#0274B2","#FFFFFF"],
+  ["levski","Levski Sofia","LEV","#26066A","#FFFFFF"],
+  ["lillestrom","Lillestrøm","LSK","#FFD486","#FFFFFF"],
+  ["lyon","Lyon","OL","#F49573","#FFFFFF"],
+  ["marseille","Marseille","OM","#34BBD9","#FFFFFF"],
+  ["milan","AC Milan","ACM","#913001","#FFFFFF"],
+  ["nec-nijmegen","NEC Nijmegen","NEC","#01D490","#FFFFFF"],
+  ["ofi","OFI Crete","OFI","#4F4F4F","#FFFFFF"],
+  ["olympiacos","Olympiacos","OLY","#CD4D03","#FFFFFF"],
+  ["omonoia","Omonoia","OMO","#08AE71","#FFFFFF"],
+  ["real-sociedad","Real Sociedad","RSO","#1095E9","#FFFFFF"],
+  ["rennes","Rennes","SRF","#C30038","#FFFFFF"],
+  ["salzburg","Salzburg","RBS","#FA0373","#FFFFFF"],
+  ["sparta-praha","Sparta Praha","SPA","#8A4A58","#FFFFFF"],
+  ["sturm-graz","Sturm Graz","STU","#383838","#FFFFFF"],
+  ["sunderland","Sunderland","SUN","#CC4A67","#FFFFFF"],
+  ["torreense","Torreense","TOR","#4A0013","#FFFFFF"],
+  ["union-saint-gilloise","Union Saint-Gilloise","USG","#E6D203","#FFFFFF"],
+  ["viktoria-plzen","Viktoria Plzeň","PLZ","#3254BD","#FFFFFF"]
+].map(([id,name,short,c1,c2,nameLang])=>({id,name,short,c1,c2,nameLang,logo:null}));
+/* each league has its own teams, logo folder and saved game */
+const LEAGUES={ucl:{teams:UCL_TEAMS,key:"football-imperialism-ucl-v1",dir:"logos"},uel:{teams:UEL_TEAMS,key:"football-imperialism-uel-v1",dir:"logos/uel"}};
+let LEAGUE="ucl", TEAMS=UCL_TEAMS, T=Object.fromEntries(TEAMS.map(t=>[t.id,t]));
 
 const COLS=9, ROWS=4, R=100, W=Math.sqrt(3)*R, PAD=40;
 const HEX=[];
@@ -223,16 +263,17 @@ function lum(hex){const n=parseInt(hex.slice(1),16);const c=[n>>16,(n>>8)&255,n&
 const textOn=h=>lum(h)>.45?"#0B1030":"#FFFFFF";
 const shade=(hex,f)=>{const n=parseInt(hex.slice(1),16);const ch=[n>>16,(n>>8)&255,n&255].map(v=>Math.round(f<0?v*(1+f):v+(255-v)*f));return "#"+ch.map(v=>v.toString(16).padStart(2,"0")).join("")};
 const ease=t=>1-Math.pow(1-t,3); // fast start, slow finish
-const tn=t=>`<span lang="en">${esc(t.name)}</span>`; // team names keep their own spelling in every language
+const tn=t=>`<span lang="${t.nameLang||"en"}">${esc(t.name)}</span>`; // team names keep their own spelling in every language
 const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 /* ---------- state ---------- */
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function fresh(){return {seed:(Math.random()*2**31)|0,owner:shuffle(TEAMS.map(t=>t.id)),phase:"wheel",att:null,def:null,defHex:null,angle:0,log:[]}}
-const KEY="football-imperialism-ucl-v1";
-let S; try{S=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){}
-if(!S||!Array.isArray(S.owner)||S.owner.length!==HEX.length||!S.owner.every(o=>T[o])) S=fresh();
-if(S.seed==null) S.seed=(Math.random()*2**31)|0;
+let KEY=LEAGUES.ucl.key, S;
+function loadState(){S=null; try{S=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){}
+  if(!S||!Array.isArray(S.owner)||S.owner.length!==HEX.length||!S.owner.every(o=>T[o])) S=fresh();
+  if(S.seed==null) S.seed=(Math.random()*2**31)|0;}
+loadState();
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 let busy=false, confirmNew=false, arrowRot=S.angle||0, view=FULL.slice();
 
@@ -291,8 +332,8 @@ function loadLogos(){
   TEAMS.forEach(t=>{
     const tryExt=exts=>{ if(!exts.length) return; const img=new Image();
       img.onload=()=>{t.logo=img.src;t.img=img;renderMap();renderSide()}; img.onerror=()=>tryExt(exts.slice(1));
-      img.src=`logos/${t.id}.${exts[0]}`;};
-    tryExt(["png","svg","webp"]);
+      img.src=`${LEAGUES[LEAGUE].dir}/${t.id}.${exts[0]}`;};
+    if(!t.logo) tryExt(["png","svg","webp"]);
   });
 }
 function crestSVG(t){ // placeholder badge, or the real logo when one is in /logos
@@ -583,7 +624,15 @@ function showMenu(on){const lg=document.getElementById("lang"); document.getElem
   if(on) document.getElementById("menuLang").appendChild(lg); else document.getElementById("confirm").before(lg); // the language picker goes along
   langOpen=false; applyLang()}
 document.getElementById("bMenu").onclick=()=>{if(!busy) showMenu(true)};
-document.getElementById("lgUCL").onclick=()=>showMenu(false);
+function setLeague(id){
+  if(id!==LEAGUE){ LEAGUE=id; TEAMS=LEAGUES[id].teams; T=Object.fromEntries(TEAMS.map(t=>[t.id,t])); KEY=LEAGUES[id].key;
+    loadState(); SHAPE=null; LOGO_CACHE.key=null; confirmNew=false; arrowRot=S.angle||0; closePop();
+    view=(S.att&&(S.phase==="arrow"||S.phase==="match"))?focusBox(S.att):FULL.slice(); renderAll(); loadLogos();
+    if(S.phase==="match") openMatch(); }
+  showMenu(false);
+}
+document.getElementById("lgUCL").onclick=()=>setLeague("ucl");
+document.getElementById("lgUEL").onclick=()=>setLeague("uel");
 document.getElementById("bArrow").onclick=spinArrow;
 async function cancelTurn(){S.att=S.def=S.defHex=null;S.phase="wheel";save();renderAll();busy=true;await zoomTo(FULL);busy=false;renderSide()}
 document.getElementById("bCancel").onclick=cancelTurn;
