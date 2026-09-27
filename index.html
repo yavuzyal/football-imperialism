@@ -722,10 +722,12 @@ async function spin(cv){
   const t=atPointer(); drawWheel(cv,t.id); fanfare();
   await new Promise(r=>setTimeout(r,700));
   S.att=t.id;S.def=null;S.defHex=null;S.angle=0;arrowRot=0;S.phase="arrow";save();busy=false;
-  pop.innerHTML=`<div class="overlay"><div class="pop"><h3>${L("attackerIs")}</h3>
+  pop.innerHTML=`<div class="overlay" id="aOv"><div class="pop"><h3>${L("attackerIs")}</h3>
     <div class="winner">${crestSVG(t)}<div class="name">${tn(t)}</div></div>
     <button class="primary" id="pGo">${L("goMap")}</button></div></div>`;
-  document.getElementById("pGo").onclick=async()=>{closePop();renderAll();busy=true;renderSide();await zoomTo(focusBox(S.att));busy=false;renderSide()};
+  const goMap=async()=>{closePop();renderAll();busy=true;renderSide();await zoomTo(focusBox(S.att));busy=false;renderSide()};
+  document.getElementById("pGo").onclick=goMap;
+  document.getElementById("aOv").onclick=e=>{ if(e.target.id==="aOv") goMap() }; // a tap outside the card also goes to the map
   renderSide();
 }
 
