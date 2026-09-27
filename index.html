@@ -945,7 +945,7 @@ async function playSim(d,a){
   let h=0,g=0,i=0;
   for(let m=0;m<=90;m++){
     cl.textContent=m+"'";
-    while(i<r.ev.length&&r.ev[i].m===m){ const e=r.ev[i++]; e.side?g++:h++; sc.textContent=`${h} – ${g}`; tick(1.3);
+    while(i<r.ev.length&&r.ev[i].m===m){ const e=r.ev[i++]; e.side?g++:h++; sc.textContent=`${h} – ${g}`; kick();
       const row=`<div class="ev ${e.side?"":"evL"}">${e.side?"":`${esc(e.p[0])} <b>${e.m}'</b>`}${e.side?`<b>${e.m}'</b> ${esc(e.p[0])}`:""}</div>`;
       evb.insertAdjacentHTML("beforeend",e.side?`<div></div>${row}`:`${row}<div></div>`); await wait(500); }
     await wait(55);
@@ -1081,6 +1081,23 @@ function spinTicker(){ // clicks spaced by spin speed: quick at the start, furth
   return t=>{ const now=performance.now(), speed=Math.pow(1-t,2); // ease-out cubic: speed falls with (1-t)^2
     if(now<next) return; const gap=50/Math.max(speed,1e-6); if(gap>1300) return;
     tick(.7); next=now+gap; };
+}
+function kick(){ // a boot striking the ball: low leather thump plus a short slap, then the ball flying off
+  const a=audio(); if(!a) return; const now=a.currentTime, out=a.createGain(); out.gain.value=.9; out.connect(a.destination);
+  const o=a.createOscillator(), g=a.createGain(); // the thump
+  o.type="sine"; o.frequency.setValueAtTime(190,now); o.frequency.exponentialRampToValueAtTime(58,now+.11);
+  g.gain.setValueAtTime(.0001,now); g.gain.exponentialRampToValueAtTime(.75,now+.004); g.gain.exponentialRampToValueAtTime(.0001,now+.2);
+  o.connect(g).connect(out); o.start(now); o.stop(now+.22);
+  const noise=(dur)=>{ const b=a.createBuffer(1,Math.ceil(a.sampleRate*dur),a.sampleRate), d=b.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+    const n=a.createBufferSource(); n.buffer=b; return n };
+  const slap=noise(.05), sf=a.createBiquadFilter(), sg=a.createGain(); // the leather slap
+  sf.type="bandpass"; sf.frequency.value=1500; sf.Q.value=.9;
+  sg.gain.setValueAtTime(.0001,now); sg.gain.exponentialRampToValueAtTime(.55,now+.002); sg.gain.exponentialRampToValueAtTime(.0001,now+.045);
+  slap.connect(sf).connect(sg).connect(out); slap.start(now);
+  const air=noise(.35), af=a.createBiquadFilter(), ag=a.createGain(); // the ball whooshing away
+  af.type="bandpass"; af.Q.value=1.4; af.frequency.setValueAtTime(700,now+.03); af.frequency.exponentialRampToValueAtTime(2600,now+.33);
+  ag.gain.setValueAtTime(.0001,now+.03); ag.gain.exponentialRampToValueAtTime(.09,now+.1); ag.gain.exponentialRampToValueAtTime(.0001,now+.34);
+  air.connect(af).connect(ag).connect(out); air.start(now+.03);
 }
 function fanfare(){ // bright rising chord for the reveal
   const a=audio(); if(!a) return; const now=a.currentTime;
