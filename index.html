@@ -122,6 +122,10 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
 .sqBox .squad button{grid-template-columns:44px 1fr auto auto}
 .squad .g{font-size:12px;font-weight:800;color:var(--muted);min-width:34px;text-align:right}.squad .g.up{color:var(--cyan)}
 .squad button.sel{border-color:var(--cyan);box-shadow:0 0 0 2px var(--cyan) inset}
+.pop.team{width:min(1000px,96vw)}.pop.team .pitch{min-height:0;width:100%}.pop.team .xiHead{width:100%;margin-bottom:-12px}
+.teamHead{display:flex;align-items:center;gap:22px}.teamHead .crest{width:110px;height:110px}
+.teamHead .name{font-family:var(--display);font-weight:800;font-size:clamp(32px,4vw,52px);text-transform:uppercase;line-height:1}
+.tOvr{font-family:var(--display);font-weight:800;letter-spacing:.08em;color:var(--muted);font-size:20px;margin-top:6px}.tOvr b{color:var(--gold);font-size:28px}
 .btnRow{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
 @media (max-width:900px){.steal{grid-template-columns:1fr}.pitch{min-height:0}.sqBox .squad{max-height:36vh}}
 @media (max-width:700px){.bar .sep{display:none}}
@@ -670,7 +674,7 @@ svg.addEventListener("pointermove",e=>{
   const k=fitOf(drag.v).k; showLive(clampView([drag.v[0]-dx/k,drag.v[1]-dy/k,drag.v[2],drag.v[3]]));
 });
 const endDrag=()=>{if(!drag) return; drag=null; svg.classList.remove("dragging"); if(live) commitT=setTimeout(commitLive,60)};
-svg.addEventListener("pointerup",endDrag); svg.addEventListener("pointercancel",endDrag);
+svg.addEventListener("pointerup",e=>{ const d=drag; endDrag(); if(d&&!d.moved) tapMap(e) }); svg.addEventListener("pointercancel",endDrag);
 
 /* ---------- wheel ---------- */
 let wheelRot=0;
@@ -749,6 +753,34 @@ async function spinArrow(){
 /* player data (FC27 ratings, men only) is loaded once; a team's squad is its base squad plus/minus the players
    moved by steals in this game's log, so undo and reload give back the same squads */
 let DB=null;
+/* ---------- taps on the map: the arrow spins it, a team's logo or land shows its best XI ---------- */
+function tapMap(e){
+  if(busy||pop.innerHTML) return;
+  const p=toUser(e,live||view);
+  if(S.phase==="arrow"&&S.att){ const a=logoSpot(S.att), sc=(logoLayout()[S.att]?.s||BASE_LOGO)/BASE_LOGO;
+    if(Math.hypot(p.x-a.x,p.y-a.y)<R*1.8*sc){ spinArrow(); return } }
+  if(S.phase!=="wheel") return;
+  const LO=logoLayout();
+  let id=Object.keys(LO).find(k=>Math.abs(p.x-LO[k].x)<LO[k].s/2&&Math.abs(p.y-LO[k].y)<LO[k].s/2);
+  if(!id){ const h=e.target.closest&&e.target.closest("[data-hex]"); if(h) id=S.owner[+h.dataset.hex] }
+  if(id) showTeam(id);
+}
+function pitchHTML(xi,hi){
+  const at=i=>xi.filter(x=>x.slot===SLOTS[i][0])[SLOTS.slice(0,i).filter(q=>q[0]===SLOTS[i][0]).length];
+  const card=i=>{ const x=at(i); if(!x) return `<div class="pc"></div>`;
+    return `<div class="pc${x.p===hi?" in":""}"><span class="o">${x.p[3]-x.pen}</span><span class="n">${esc(x.p[0])}</span><span class="ps">${x.slot}</span></div>` };
+  return [[8,9,10],[6,5,7],[1,2,3,4],[0]].map(r=>`<div class="prow">${r.map(card).join("")}</div>`).join("");
+}
+function showTeam(id){
+  const t=T[id], st=DB?strength(id):null, xi=DB?bestXI(id):[];
+  const gained=new Set(S.log.filter(e=>e.steal&&e.steal.to===id).map(e=>e.steal.p[0]));
+  pop.innerHTML=`<div class="overlay" id="tOv"><div class="pop team"><div class="teamHead">${crestSVG(t)}<div><div class="name">${tn(t)}</div>${st?`<div class="tOvr">${L("ovr")} <b>${st.ovr}</b></div>`:""}</div></div>
+    ${DB?`<div class="xiHead"><span>${L("bestXI")}</span></div><div class="pitch">${pitchHTML(xi)}</div>`:`<div class="hint">${L("noData")}</div>`}
+    <button id="tClose">${L("close")}</button></div></div>`;
+  if(gained.size) pop.querySelectorAll(".pc .n").forEach(n=>{ if(gained.has(n.textContent)) n.parentNode.classList.add("in") });
+  document.getElementById("tClose").onclick=closePop;
+  document.getElementById("tOv").onclick=e=>{ if(e.target.id==="tOv") closePop() };
+}
 fetch("players.json").then(r=>r.ok?r.json():null).then(j=>{if(j&&j.teams){DB=j.teams; if(S.phase==="match"&&!busy&&pop.querySelector("#wD")&&!pop.querySelector("#mSim")) openMatch()}}).catch(()=>{});
 function squad(id){
   if(!DB) return [];
@@ -862,10 +894,7 @@ function stealPick(win){ // the winner may take one player from the loser's squa
     const p=sel<0?null:sq[sel], st=p?strength(win,p):base;
     const o=document.getElementById("xOvr");
     o.innerHTML=!base||!st?"":p&&st.ovr!==base.ovr?`${L("ovr")} ${base.ovr} → <em>${st.ovr}</em>`:`${L("ovr")} ${base.ovr}`;
-    const xi=bestXI(win,p), at=i=>xi.filter(x=>x.slot===SLOTS[i][0])[SLOTS.slice(0,i).filter(q=>q[0]===SLOTS[i][0]).length];
-    const card=i=>{ const x=at(i); if(!x) return `<div class="pc"></div>`;
-      return `<div class="pc${x.p===p?" in":""}"><span class="o">${x.p[3]-x.pen}</span><span class="n">${esc(x.p[0])}</span><span class="ps">${x.slot}</span></div>` };
-    document.getElementById("xPitch").innerHTML=[[8,9,10],[6,5,7],[1,2,3,4],[0]].map(r=>`<div class="prow">${r.map(card).join("")}</div>`).join("");
+    document.getElementById("xPitch").innerHTML=pitchHTML(bestXI(win,p),p);
     const go=document.getElementById("sGo"); go.disabled=!p;
     go.textContent=p?L("stealP").replace("{p}",p[0]):L("stealGo");
     pop.querySelectorAll(".squad button").forEach(b=>b.classList.toggle("sel",+b.dataset.i===sel));
