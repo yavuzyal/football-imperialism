@@ -72,18 +72,18 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
 .langmenu button:hover,.langmenu button.on{background:var(--panel-2)}
 .danger{background:var(--red);border-color:transparent;color:#fff}
 /* main menu */
-.menu{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:safe center;gap:34px;padding:24px;overflow-y:auto;
+.menu{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:safe center;gap:26px;padding:24px;overflow-y:auto;
   background:radial-gradient(900px 560px at 50% 42%,rgba(21,32,106,.82) 0%,rgba(7,11,36,.94) 70%);backdrop-filter:blur(6px)}
 .menu[hidden]{display:none}
-.menu .title{font-family:var(--display);font-weight:800;font-size:clamp(46px,8vw,104px);line-height:.88;text-transform:uppercase;text-align:center;letter-spacing:.02em;margin:0}
+.menu .title{font-family:var(--display);font-weight:800;font-size:clamp(46px,min(8vw,10.5vh),104px);line-height:.88;text-transform:uppercase;text-align:center;letter-spacing:.02em;margin:0}
 .menu .title span{display:block;color:var(--cyan)}
-.leagues{display:grid;grid-template-columns:repeat(2,440px);gap:16px}
-@media (max-width:940px){.leagues{grid-template-columns:minmax(0,440px)}}
-.league{display:flex;align-items:center;gap:16px;width:100%;min-height:92px;padding:16px 26px 16px 18px;border-radius:18px;background:linear-gradient(180deg,#1B2A78,#111A4D);text-align:left}
+.leagues{display:grid;grid-template-columns:repeat(2,360px);gap:12px}
+@media (max-width:780px){.leagues{grid-template-columns:minmax(0,360px)}}
+.league{display:flex;align-items:center;gap:13px;width:100%;min-height:72px;padding:11px 20px 11px 14px;border-radius:15px;background:linear-gradient(180deg,#1B2A78,#111A4D);text-align:left}
 .league:hover{box-shadow:0 0 0 4px rgba(53,214,255,.2)}
-.league img{width:58px;height:58px;flex:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))}
-.league b{display:block;font-family:var(--display);font-weight:800;font-size:26px;white-space:nowrap;text-transform:uppercase;letter-spacing:.03em;line-height:1}
-.league small{color:var(--muted);font-size:14px;font-weight:600}
+.league img{width:46px;height:46px;flex:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))}
+.league b{display:block;font-family:var(--display);font-weight:800;font-size:21px;white-space:nowrap;text-transform:uppercase;letter-spacing:.03em;line-height:1}
+.league small{color:var(--muted);font-size:13px;font-weight:600}
 .league.custom{grid-column:1/-1;justify-content:center;background:linear-gradient(180deg,#5A4A12,#2B230A);border-color:#8C7322}
 .league.custom small{color:#E9D9A6}
 .picker{position:fixed;inset:0;z-index:25;display:flex;flex-direction:column;background:radial-gradient(900px 560px at 50% 30%,#15206A 0%,var(--deep) 55%,var(--night) 100%)}
