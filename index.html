@@ -72,10 +72,10 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
 .langmenu button:hover,.langmenu button.on{background:var(--panel-2)}
 .danger{background:var(--red);border-color:transparent;color:#fff}
 /* main menu */
-.menu{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:safe center;gap:26px;padding:24px;overflow-y:auto;
+.menu{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:safe center;gap:26px;padding:24px 24px 10px;overflow-y:auto;
   background:radial-gradient(900px 560px at 50% 42%,rgba(21,32,106,.82) 0%,rgba(7,11,36,.94) 70%);backdrop-filter:blur(6px)}
 .menu[hidden]{display:none}
-.menu .title{font-family:var(--display);font-weight:800;font-size:clamp(46px,min(8vw,10.5vh),104px);line-height:.88;text-transform:uppercase;text-align:center;letter-spacing:.02em;margin:0}
+.menu .title{margin-top:auto!important;font-family:var(--display);font-weight:800;font-size:clamp(46px,min(8vw,10.5vh),104px);line-height:.88;text-transform:uppercase;text-align:center;letter-spacing:.02em;margin:0}
 .menu .title span{display:block;color:var(--cyan)}
 .leagues{display:grid;grid-template-columns:repeat(2,360px);gap:12px}
 @media (max-width:780px){.leagues{grid-template-columns:minmax(0,360px)}}
@@ -86,7 +86,9 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
 .league small{color:var(--muted);font-size:13px;font-weight:600}
 .league.custom{grid-column:1/-1;justify-content:center;background:linear-gradient(180deg,#5A4A12,#2B230A);border-color:#8C7322}
 .league.custom small{color:#E9D9A6}
-.disclaimer{max-width:740px;margin:-12px 0 0;color:var(--muted);font-size:12px;line-height:1.45;text-align:center;opacity:.8}
+.menuFoot{display:flex;align-items:center;justify-content:center;gap:16px}
+.credit{color:var(--muted);font-size:14px;font-weight:600;white-space:nowrap}.credit a{color:var(--gold);text-decoration:underline;text-underline-offset:3px;font-weight:800}.credit a:hover{color:#FFD970}
+.disclaimer{max-width:740px;margin:auto 0 0;color:var(--muted);font-size:12px;line-height:1.45;text-align:center;opacity:.8}
 .picker{position:fixed;inset:0;z-index:25;display:flex;flex-direction:column;background:radial-gradient(900px 560px at 50% 30%,#15206A 0%,var(--deep) 55%,var(--night) 100%)}
 .picker[hidden]{display:none}
 .pkHead{display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid var(--edge)}
@@ -174,7 +176,8 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
   .league{min-height:0;padding:8px 14px 8px 10px;gap:10px;border-radius:12px}
   .league img{width:34px;height:34px}
   .league b{font-size:17px}.league small{font-size:12px}
-  .disclaimer{font-size:10px;margin:0;max-width:600px}
+  .disclaimer{font-size:10px;max-width:600px}
+  .menuFoot{gap:10px}.credit{font-size:12px}
   .pkHead{padding:8px max(14px,env(safe-area-inset-left));gap:10px}.pkHead h2{font-size:16px}#pkSearch{padding:5px 12px;font-size:14px}
   .pkBody{padding:6px max(14px,env(safe-area-inset-left)) 12px;gap:8px}.pkLg{margin:2px 0 4px}.pkLg b{font-size:15px}
   .chips{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:5px}.chip{padding:4px 8px;font-size:12px}.chip img{width:22px;height:22px}
@@ -258,7 +261,7 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
     <button class="league custom" id="lgCUS"><img src="img/logo-ball.png?v=4" alt="" width="58" height="58">
       <span><b data-t="customLg">Custom league</b><small data-t="customSub">Create your own league</small></span></button>
   </div>
-  <div id="menuLang"></div>
+  <div class="menuFoot"><div id="menuLang"></div><span class="credit">Created by <a href="https://www.youtube.com/@yvz_fc" target="_blank" rel="noopener">YVZ</a></span></div>
   <p class="disclaimer" data-t="disclaimer">Football Imperialism is a free fan-made game, made purely for fun. It is not affiliated with, endorsed or sponsored by FIFA, UEFA, EA Sports or any league or club. All club and league names and logos belong to their owners.</p>
 </div>
 <div class="picker" id="picker" hidden>
