@@ -75,7 +75,7 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
 .menu{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:safe center;gap:26px;padding:24px 24px 10px;overflow-y:auto;
   background:radial-gradient(900px 560px at 50% 42%,rgba(21,32,106,.82) 0%,rgba(7,11,36,.94) 70%);backdrop-filter:blur(6px)}
 .menu[hidden]{display:none}
-@media (max-height:760px){.menu{gap:18px}.credit{margin-top:-10px}}
+@media (max-height:760px){.menu{gap:18px}}
 .menu .title{margin-top:auto!important;font-family:var(--display);font-weight:800;font-size:clamp(46px,min(8vw,10.5vh),104px);line-height:.88;text-transform:uppercase;text-align:center;letter-spacing:.02em;margin:0}
 .menu .title span{display:block;color:var(--cyan)}
 .leagues{display:grid;grid-template-columns:repeat(2,360px);gap:12px}
@@ -87,7 +87,9 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
 .league small{color:var(--muted);font-size:13px;font-weight:600}
 .league.custom{grid-column:1/-1;justify-content:center;background:linear-gradient(180deg,#5A4A12,#2B230A);border-color:#8C7322}
 .league.custom small{color:#E9D9A6}
-.credit{color:var(--muted);font-size:14px;font-weight:600;white-space:nowrap;margin-top:-16px}.credit a{color:var(--gold);text-decoration:underline;text-underline-offset:3px;font-weight:800}.credit a:hover{color:#FFD970}
+.byRow{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:-14px}
+.credit{color:var(--muted);font-size:14px;font-weight:600;white-space:nowrap}
+#menuLang .langmenu{top:calc(100% + 8px);bottom:auto;left:0;right:auto;z-index:5}.credit a{color:var(--gold);text-decoration:underline;text-underline-offset:3px;font-weight:800}.credit a:hover{color:#FFD970}
 .disclaimer{max-width:740px;margin:auto 0 0;color:var(--muted);font-size:12px;line-height:1.45;text-align:center;opacity:.8}
 .picker{position:fixed;inset:0;z-index:25;display:flex;flex-direction:column;background:radial-gradient(900px 560px at 50% 30%,#15206A 0%,var(--deep) 55%,var(--night) 100%)}
 .picker[hidden]{display:none}
@@ -177,7 +179,7 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
   .league img{width:34px;height:34px}
   .league b{font-size:17px}.league small{font-size:12px}
   .disclaimer{font-size:10px;max-width:600px}
-  .credit{font-size:12px;margin-top:-8px}
+  .credit{font-size:12px}.byRow{margin-top:-6px;gap:10px}
   .pkHead{padding:8px max(14px,env(safe-area-inset-left));gap:10px}.pkHead h2{font-size:16px}#pkSearch{padding:5px 12px;font-size:14px}
   .pkBody{padding:6px max(14px,env(safe-area-inset-left)) 12px;gap:8px}.pkLg{margin:2px 0 4px}.pkLg b{font-size:15px}
   .chips{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:5px}.chip{padding:4px 8px;font-size:12px}.chip img{width:22px;height:22px}
@@ -241,7 +243,7 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
 <div class="rotate" id="rotate"><svg viewBox="0 0 100 100" fill="none" stroke="#35D6FF" stroke-width="6" stroke-linejoin="round"><rect x="28" y="8" width="44" height="84" rx="9"/><circle cx="50" cy="80" r="3" fill="#35D6FF" stroke="none"/></svg><b data-t="rotateT">Turn your phone</b><span data-t="rotateH">Football Imperialism plays in landscape.</span></div>
 <div class="menu" id="menu">
   <h1 class="title" lang="en" translate="no"><span>Football</span>Imperialism</h1>
-  <div class="credit">by <a href="https://www.youtube.com/@yvz_fc" target="_blank" rel="noopener">YVZ</a></div>
+  <div class="byRow"><div id="menuLang"></div><div class="credit">by <a href="https://www.youtube.com/@yvz_fc" target="_blank" rel="noopener">YVZ</a></div></div>
   <div class="leagues">
     <button class="league" id="lgUCL"><img src="img/champions-league.png" alt="" width="58" height="58">
       <span><b data-t="ucl">Champions League</b><small id="uclSub">36 teams</small></span></button>
@@ -262,7 +264,6 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
     <button class="league custom" id="lgCUS"><img src="img/logo-ball.png?v=4" alt="" width="58" height="58">
       <span><b data-t="customLg">Custom league</b><small data-t="customSub">Create your own league</small></span></button>
   </div>
-  <div id="menuLang"></div>
   <p class="disclaimer" data-t="disclaimer">Football Imperialism is a free fan-made game, made purely for fun. It is not affiliated with, endorsed or sponsored by FIFA, UEFA, EA Sports or any league or club. All club and league names and logos belong to their owners.</p>
 </div>
 <div class="picker" id="picker" hidden>
