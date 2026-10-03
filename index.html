@@ -75,7 +75,6 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
 .menu[hidden]{display:none}
 .menu .title{font-family:var(--display);font-weight:800;font-size:clamp(46px,8vw,104px);line-height:.88;text-transform:uppercase;text-align:center;letter-spacing:.02em;margin:0}
 .menu .title span{display:block;color:var(--cyan)}
-.menu h2{font-size:16px}
 .leagues{display:grid;grid-template-columns:repeat(2,440px);gap:16px}
 @media (max-width:940px){.leagues{grid-template-columns:minmax(0,440px)}}
 .league{display:flex;align-items:center;gap:16px;width:100%;min-height:92px;padding:16px 26px 16px 18px;border-radius:18px;background:linear-gradient(180deg,#1B2A78,#111A4D);text-align:left}
@@ -168,7 +167,6 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
   #confirm .confirm{flex-direction:column;align-items:stretch;text-align:center}
   .menu{justify-content:flex-start;gap:12px;padding:14px max(16px,env(safe-area-inset-right)) 14px max(16px,env(safe-area-inset-left));overflow-y:auto}
   .menu .title{font-size:38px;display:flex;gap:.25em}.menu .title span{display:inline}
-  .menu h2{font-size:13px}
   .leagues{grid-template-columns:repeat(2,minmax(0,300px));gap:8px}
   .league{min-height:0;padding:8px 14px 8px 10px;gap:10px;border-radius:12px}
   .league img{width:34px;height:34px}
@@ -236,7 +234,6 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
 <div class="rotate" id="rotate"><svg viewBox="0 0 100 100" fill="none" stroke="#35D6FF" stroke-width="6" stroke-linejoin="round"><rect x="28" y="8" width="44" height="84" rx="9"/><circle cx="50" cy="80" r="3" fill="#35D6FF" stroke="none"/></svg><b data-t="rotateT">Turn your phone</b><span data-t="rotateH">Football Imperialism plays in landscape.</span></div>
 <div class="menu" id="menu">
   <h1 class="title" lang="en" translate="no"><span>Football</span>Imperialism</h1>
-  <h2 data-t="chooseLeague">Choose a league</h2>
   <div class="leagues">
     <button class="league" id="lgUCL"><img src="img/champions-league.png" alt="" width="58" height="58">
       <span><b data-t="ucl">Champions League</b><small id="uclSub">36 teams</small></span></button>
