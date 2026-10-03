@@ -70,7 +70,7 @@ h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppe
 .langmenu button:hover,.langmenu button.on{background:var(--panel-2)}
 .danger{background:var(--red);border-color:transparent;color:#fff}
 /* main menu */
-.menu{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;padding:24px;
+.menu{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:safe center;gap:34px;padding:24px;overflow-y:auto;
   background:radial-gradient(900px 560px at 50% 42%,rgba(21,32,106,.82) 0%,rgba(7,11,36,.94) 70%);backdrop-filter:blur(6px)}
 .menu[hidden]{display:none}
 .menu .title{font-family:var(--display);font-weight:800;font-size:clamp(46px,8vw,104px);line-height:.88;text-transform:uppercase;text-align:center;letter-spacing:.02em;margin:0}
@@ -528,7 +528,10 @@ function buildGrid(cols,rows,n){ HEX.length=0; n=n||cols*rows; // n < cols*rows 
   MAPH=gh; MAPW=MAPH*ASPECT; if(gw>MAPW){MAPW=gw;MAPH=MAPW/ASPECT} // a grid wider than the 9x4 shape widens the frame instead
   MINW=MAPW/6; FULL[2]=MAPW; FULL[3]=MAPH;
   const off=(MAPW-gw)/2, offY=(MAPH-gh)/2;
-  for(let r=0;r<rows;r++){ const k=r<rows-1?cols:n-cols*(rows-1), sh=Math.floor((cols-k)/2)*W;
+  // spread the blocks evenly: rows differ by at most one, the longer rows go in the middle
+  const base=Math.floor(n/rows), extra=n-base*rows, mid=(rows-1)/2;
+  const longRows=new Set([...Array(rows).keys()].sort((x,y)=>Math.abs(x-mid)-Math.abs(y-mid)||x-y).slice(0,extra));
+  for(let r=0;r<rows;r++){ const k=base+(longRows.has(r)?1:0), sh=Math.floor((cols-k)/2)*W;
     for(let c=0;c<k;c++) HEX.push({x:off+sh+PAD+W/2+c*W+(r%2)*W/2, y:offY+PAD+R+r*1.5*R}); }
   HEX.forEach((h,i)=>h.nb=HEX.map((o,j)=>j).filter(j=>j!==i&&Math.hypot(HEX[j].x-h.x,HEX[j].y-h.y)<W*1.05)); }
 buildGrid(COLS,ROWS);
