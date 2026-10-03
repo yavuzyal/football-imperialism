@@ -1085,8 +1085,11 @@ function setLeague(id){
 }
 /* ---------- custom league: any teams from every league ---------- */
 const MENU_ORDER=["ucl","uel","epl","lal","bl","l1","sa","tsl"];
+// the same club under a European-cup id and its domestic-league id
+const ALIAS={atletico:"atletico-madrid",bayern:"bayern-munchen",dortmund:"borussia-dortmund",leipzig:"rb-leipzig","man-city":"manchester-city","man-united":"manchester-united",betis:"real-betis",stuttgart:"vfb-stuttgart"};
+const canon=id=>ALIAS[id]||id;
 const POOL={}; // one entry per club; a domestic league's version wins (its own spelling and land colour)
-for(const lg of ["epl","lal","bl","l1","sa","tsl","ucl","uel"]) for(const t of LEAGUES[lg].teams) if(!POOL[t.id]) POOL[t.id]={...t,logo:null,img:null,dir:LEAGUES[lg].dir};
+for(const lg of ["epl","lal","bl","l1","sa","tsl","ucl","uel"]) for(const t of LEAGUES[lg].teams) if(!POOL[canon(t.id)]) POOL[canon(t.id)]={...t,logo:null,img:null,dir:LEAGUES[lg].dir};
 const CSEL="football-imperialism-custom-teams";
 LEAGUES.custom={teams:[],key:"football-imperialism-custom-v1",dir:"logos"};
 function layoutFor(n){ // rows and columns closest to the 9x4 shape (2.25 columns per row), last row may be short
@@ -1104,17 +1107,17 @@ function enterLeague(){ // after LEAGUE/TEAMS/HEX are set: load its saved game a
 function useCustom(ids){ LEAGUE="custom"; TEAMS=ids.map(id=>POOL[id]); LEAGUES.custom.teams=TEAMS;
   const {cols,rows}=layoutFor(TEAMS.length); buildGrid(cols,rows,TEAMS.length); }
 function savedCustom(){ try{const g=JSON.parse(localStorage.getItem(LEAGUES.custom.key)||"null");
-  return g&&Array.isArray(g.teams)&&g.teams.length>=2&&g.teams.every(id=>POOL[id])?g:null}catch(e){return null} }
-let pick=new Set(); try{pick=new Set((JSON.parse(localStorage.getItem(CSEL)||"[]")).filter(id=>POOL[id]))}catch(e){}
+  return g&&Array.isArray(g.teams)&&g.teams.length>=2&&g.teams.every(id=>POOL[id]&&!ALIAS[id])?g:null}catch(e){return null} }
+let pick=new Set(); try{pick=new Set((JSON.parse(localStorage.getItem(CSEL)||"[]")).map(canon).filter(id=>POOL[id]))}catch(e){}
 const fold=x=>x.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 function openPicker(){ const pk=document.getElementById("picker"); pk.hidden=false; document.getElementById("pkSearch").value=""; renderPicker() }
 function renderPicker(){
   const q=fold(document.getElementById("pkSearch").value.trim());
   document.getElementById("pkBody").innerHTML=MENU_ORDER.map(lg=>{
     const ts=LEAGUES[lg].teams.filter(t=>!q||fold(t.name).includes(q)); if(!ts.length) return "";
-    const all=ts.every(t=>pick.has(t.id));
+    const all=ts.every(t=>pick.has(canon(t.id)));
     return `<section><div class="pkLg"><b>${L(lg)}</b><button class="small" data-all="${lg}">${L(all?"allOff":"allOn")}</button></div>
-      <div class="chips">${ts.map(t=>`<button class="chip${pick.has(t.id)?" on":""}" data-id="${t.id}"><img src="${LEAGUES[lg].dir}/${t.id}.png" alt="" loading="lazy"><span>${tn(t)}</span></button>`).join("")}</div></section>`}).join("")
+      <div class="chips">${ts.map(t=>`<button class="chip${pick.has(canon(t.id))?" on":""}" data-id="${canon(t.id)}"><img src="${LEAGUES[lg].dir}/${t.id}.png" alt="" loading="lazy"><span>${tn(t)}</span></button>`).join("")}</div></section>`}).join("")
     ||`<div class="hint">—</div>`;
   const n=pick.size, go=document.getElementById("pkGo");
   document.getElementById("pkCount").textContent=n<2?L("minTeams"):L("selN").replace("{n}",n);
@@ -1122,7 +1125,7 @@ function renderPicker(){
   const sv=savedCustom(), rs=document.getElementById("pkResume"); rs.hidden=!sv; if(sv) rs.textContent=L("resume").replace("{n}",sv.teams.length);
   document.querySelectorAll("#pkBody .chip").forEach(b=>b.onclick=()=>{ pick.has(b.dataset.id)?pick.delete(b.dataset.id):pick.add(b.dataset.id); keepPick(); renderPicker() });
   document.querySelectorAll("#pkBody [data-all]").forEach(b=>b.onclick=()=>{ const lg=b.dataset.all, ts=LEAGUES[lg].teams.filter(t=>!q||fold(t.name).includes(q));
-    const all=ts.every(t=>pick.has(t.id)); ts.forEach(t=>all?pick.delete(t.id):pick.add(t.id)); keepPick(); renderPicker() });
+    const all=ts.every(t=>pick.has(canon(t.id))); ts.forEach(t=>all?pick.delete(canon(t.id)):pick.add(canon(t.id))); keepPick(); renderPicker() });
 }
 function keepPick(){ try{localStorage.setItem(CSEL,JSON.stringify([...pick]))}catch(e){} }
 document.getElementById("lgCUS").onclick=openPicker;
@@ -1130,7 +1133,7 @@ document.getElementById("pkBack").onclick=()=>{document.getElementById("picker")
 document.getElementById("pkSearch").oninput=renderPicker;
 document.getElementById("pkClear").onclick=()=>{pick.clear();keepPick();renderPicker()};
 document.getElementById("pkGo").onclick=()=>{ if(pick.size<2) return;
-  const ids=MENU_ORDER.flatMap(lg=>LEAGUES[lg].teams.map(t=>t.id)).filter((id,i,a)=>pick.has(id)&&a.indexOf(id)===i);
+  const ids=MENU_ORDER.flatMap(lg=>LEAGUES[lg].teams.map(t=>canon(t.id))).filter((id,i,a)=>pick.has(id)&&a.indexOf(id)===i);
   useCustom(ids); KEY=LEAGUES.custom.key; T=Object.fromEntries(TEAMS.map(t=>[t.id,t])); S=fresh(); save(); enterLeague() };
 document.getElementById("pkResume").onclick=()=>{ const sv=savedCustom(); if(!sv) return; useCustom(sv.teams); enterLeague() };
 document.getElementById("lgUCL").onclick=()=>setLeague("ucl");
