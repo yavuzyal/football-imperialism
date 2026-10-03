@@ -57,6 +57,7 @@ button:disabled{opacity:.35;cursor:not-allowed}
 .crest{width:50px;height:50px;flex:none}
 .small{font-size:13px;padding:6px 11px;border-radius:999px}
 .row{display:flex;flex-wrap:wrap;gap:8px}
+.simBtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 auto}.simBtns button{width:100%}
 h2{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0}
 .log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--silver)}
 .log b{color:var(--ink)}
@@ -967,7 +968,7 @@ function openMatch(){
     </div>
     <div class="clock" id="mClock" hidden></div><div class="events" id="mEv" hidden></div><div class="pens" id="mPens" hidden></div>
     <div id="mCtl" style="display:flex;flex-direction:column;align-items:center;gap:14px">
-      ${sd&&sa?`<div class="row"><button class="primary" id="mSim">▶ ${L("simulate")}</button><button class="primary" id="mEnd">⏭ ${L("simEnd")}</button></div><div class="hint">${L("orPick")}</div>`:`<div class="hint">${DB?L("hint"):L("noData")}</div>`}
+      ${sd&&sa?`<div class="simBtns"><button class="primary" id="mSim">▶ ${L("simulate")}</button><button class="primary" id="mEnd">⏭ ${L("simEnd")}</button></div><div class="hint">${L("orPick")}</div>`:`<div class="hint">${DB?L("hint"):L("noData")}</div>`}
       <div class="row"><button id="wD">${L("won").replace("{t}",tn(d))}</button><button id="wA">${L("won").replace("{t}",tn(a))}</button></div>
       <button id="pCancel">${L("cancel")}</button></div></div></div>`;
   document.getElementById("wD").onclick=()=>stealPick(d.id);
